@@ -3,17 +3,15 @@
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(800, 800), "Window Title");
-    sf::Texture robot1_texture;
-    if (!robot1_texture.loadFromFile("assets/rob2front.png"))
-    {
-        std::cout << "error";
-        return 0;
-    }
-
-    sf::Sprite robot1;
-    robot1.setTexture(robot1_texture);
-    robot1.setPosition(sf::Vector2f(200, 200));
-    robot1.scale(sf::Vector2f(2,2));
+    sf::VertexArray hexagon(sf::TriangleFan, 7);    
+    hexagon[0].position = sf::Vector2f(100.f, 100.f);
+    hexagon[1].position = sf::Vector2f(100.f, 140.f);
+    hexagon[2].position = sf::Vector2f(134.f, 120.f);
+    hexagon[3].position = sf::Vector2f(134.f, 80.f);
+    hexagon[4].position = sf::Vector2f(100.f, 60.f);
+    hexagon[5].position = sf::Vector2f(66.f, 80.f);
+    hexagon[6].position = sf::Vector2f(66.f, 120.f);
+    
 
     while (window.isOpen())
     {
@@ -24,8 +22,8 @@ int main()
                 window.close();
         }
 
-        window.clear();
-        window.draw(robot1);
+        window.clear(sf::Color(18, 33, 43)); // Color background
+        window.draw(hexagon);
         window.display();
     }
 
