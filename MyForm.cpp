@@ -9,7 +9,7 @@ struct Tile
     char structure;
 };
 Tile map[tile_cnt];
-void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical)
+void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical,Tile map[])
 {
     for (int i = 0; i < tile_cnt; ++i)
         map[i].status = 'w';
@@ -18,24 +18,22 @@ void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical)
             map[j + i * 17].status = 'g';
     map[4].status = 'w';
     map[6].status = 'w';
-    map[8].status = 'f';
-    map[68].status = 'w';
-    map[70].status = 'w';
-    map[103].status = 't';
-    map[151].status = 't';
-    map[135].status = 'w';
-    map[133].status = 'w';
-    map[199].status = 'w';
-    map[201].status = 'w';
-    map[201].status = 'w';
-    map[258].status = 'w';
-    map[259].status = 'w';
-    map[260].status = 'm';
+    map[8].status = 'n';
+    map[72].status = 'w';
+    map[74].status = 'w';
+    map[109].status = 't';
+    map[160].status = 't';
+    map[140].status = 'w';
+    map[142].status = 'w';
+    map[208].status = 'w';
+    map[210].status = 'w';
+    map[275].status = 'm';
 
 }
 int main()
 {
-    int g;
+    
+    
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
     while (window.isOpen())
     {
@@ -47,67 +45,75 @@ int main()
         }
         window.clear();
         int side = 35;
-        sf::CircleShape hexagon(side, 6);
-        hexagon.setFillColor(sf::Color::Green);
-        hexagon.setOutlineThickness(2);
-        hexagon.setOutlineColor(sf::Color::Blue);
         int numberOfHexagons_horizontal = 17, numberOfHexagons_vertical = 16;
-        int sign = 1;
+        int sign = 1, current_i;
         float pos_y, pos_x;
         float startX = 400;
         float startY = 50;
         float horizontalSpacing = side * sqrt(3) / 2;
         float verticalSpacing = 1.5 * side;
+        int g;
+        create_map(numberOfHexagons_horizontal, numberOfHexagons_vertical, map);
+        sf::CircleShape hexagon(side, 6);
+        hexagon.setOutlineThickness(2);
+        hexagon.setOutlineColor(sf::Color::Blue);
         for (int j = 0; j <numberOfHexagons_horizontal-1; ++j)
         {
             sign = -1;
             for (int i = 1; i <=numberOfHexagons_vertical; ++i)
             {
                 pos_y = startY + i * verticalSpacing;
+                current_i = i + j * numberOfHexagons_horizontal;
                 if (sign == 1)
                 {
                     pos_x = startX - horizontalSpacing;
                     hexagon.setPosition(pos_x, pos_y);
-                    map[i+j*numberOfHexagons_horizontal].x = pos_x;
+                    map[current_i].x = pos_x;
                 }
                 else
                 {
                     hexagon.setPosition(startX, pos_y);
-                    map[i + j * numberOfHexagons_horizontal].x = startX;
+                    map[current_i].x = startX;
                 }
-                map[i + j * numberOfHexagons_horizontal].y = pos_y;
+                map[current_i].y = pos_y;
+                if(map[current_i].status=='w') hexagon.setFillColor(sf::Color::Blue);
+                else if (map[current_i].status == 'g') 
+                        hexagon.setFillColor(sf::Color(128, 128, 128));
+                else if (map[current_i].status == 'n') 
+                        hexagon.setFillColor(sf::Color::Green);
+                else if (map[current_i].status == 't')
+                        hexagon.setFillColor(sf::Color::Red);
+                else if (map[current_i].status == 'm')
+                        hexagon.setFillColor(sf::Color(160, 32, 240));
                 window.draw(hexagon);
                 sign = -sign;
+                g = current_i;
             }
             startX += side * sqrt(3);
+            
         }
+        
         startY += 3 * side;
         startX -= side * sqrt(3) / 2;
         verticalSpacing = 3 * side;
-        g = numberOfHexagons_horizontal * numberOfHexagons_vertical-1;
         for (int k = 0; k < numberOfHexagons_vertical / 2; ++k)
         {
             hexagon.setPosition(startX, startY + k * verticalSpacing);
             map[g].x = startX;
             map[g].y = startY + k * verticalSpacing;
             g++;
+            current_i = g;
+            if (map[current_i].status == 'w') hexagon.setFillColor(sf::Color::Blue);
+            else if (map[current_i].status == 'g')
+                hexagon.setFillColor(sf::Color(128, 128, 128));
+            else if (map[current_i].status == 'n')
+                hexagon.setFillColor(sf::Color::Green);
+            else if (map[current_i].status == 't')
+                hexagon.setFillColor(sf::Color::Red);
+            else if (map[current_i].status == 'm')
+                hexagon.setFillColor(sf::Color(160, 32, 240));
             window.draw(hexagon);
         }
-        float x_, y_;
-        hexagon.setFillColor(sf::Color(128, 128, 128));
-        hexagon.setOutlineThickness(2);
-        hexagon.setOutlineColor(sf::Color::Blue);
-        for (int i = 0; i < tile_cnt; ++i)
-            map[i].status = 'w';
-        for (int i = 0; i <= 15; ++i)
-            for (int j = 4; j <= 9; ++j)
-            {
-                map[j + i * 17].status = 'g';
-                x_ = map[j + i * 17].x;
-                y_ = map[j + i * 17].y;
-                hexagon.setPosition(x_, y_);
-                window.draw(hexagon);
-            }
         window.display();
     }
     return 0;
