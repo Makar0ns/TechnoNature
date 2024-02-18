@@ -9,7 +9,7 @@ struct Tile
     char structure;
 };
 Tile map[tile_cnt];
-void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical,Tile map[])
+void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical, Tile map[])
 {
     for (int i = 0; i < tile_cnt; ++i)
         map[i].status = 'w';
@@ -29,11 +29,67 @@ void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical,T
     map[210].status = 'w';
     map[275].status = 'm';
 
+    map[19].status = 'a';
+    map[20].status = 'g';
+    map[105].status = 'g';
+    map[121].status = 'g';
+    map[120].status = 'g';
+    map[137].status = 'g';
+    map[155].status = 'g';
+    map[156].status = 'g';
+    map[241].status = 'g';
+    map[257].status = 'a';
+
+    map[27].status = 'g';
+    map[78].status = 'g';
+    map[129].status = 'g';
+    map[146].status = 'g';
+    map[163].status = 'g';
+    map[214].status = 'g';
+    map[241].status = 'g';
+    map[265].status = 'g';
+
+    map[28].status = 'g';
+    map[113].status = 'g';
+    map[164].status = 'g';
+    map[249].status = 'g';
+
+    map[46].status = 'g';
+    map[131].status = 'g';
+    map[148].status = 'e';
+    map[165].status = 'g';
+    map[250].status = 'g';
+
+    map[47].status = 'g';
+    map[81].status = 'g';
+    map[115].status = 'g';
+    map[166].status = 'g';
+    map[200].status = 'g';
+    map[234].status = 'g';
+
+    map[65].status = 'g';
+    map[82].status = 'g';
+    map[116].status = 'g';
+    map[184].status = 'g';
+    map[218].status = 'g';
+    map[235].status = 'g';
+
+    map[49].status = 'g';
+    map[83].status = 'g';
+    map[100].status = 'g';
+    map[185].status = 'g';
+    map[202].status = 'g';
+    map[236].status = 'g';
+
+    map[67].status = 'g';
+    map[84].status = 'p';
+    map[220].status = 'p';
+    map[237].status = 'g';
 }
 int main()
 {
-    
-    
+
+
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
     while (window.isOpen())
     {
@@ -56,11 +112,11 @@ int main()
         create_map(numberOfHexagons_horizontal, numberOfHexagons_vertical, map);
         sf::CircleShape hexagon(side, 6);
         hexagon.setOutlineThickness(2);
-        hexagon.setOutlineColor(sf::Color::Blue);
-        for (int j = 0; j <numberOfHexagons_horizontal-1; ++j)
+        hexagon.setOutlineColor(sf::Color::Black);
+        for (int j = 0; j < numberOfHexagons_horizontal - 1; ++j)
         {
             sign = -1;
-            for (int i = 1; i <=numberOfHexagons_vertical; ++i)
+            for (int i = 1; i <= numberOfHexagons_vertical; ++i)
             {
                 pos_y = startY + i * verticalSpacing;
                 current_i = i + j * numberOfHexagons_horizontal;
@@ -76,23 +132,30 @@ int main()
                     map[current_i].x = startX;
                 }
                 map[current_i].y = pos_y;
-                if(map[current_i].status=='w') hexagon.setFillColor(sf::Color::Blue);
-                else if (map[current_i].status == 'g') 
-                        hexagon.setFillColor(sf::Color(128, 128, 128));
-                else if (map[current_i].status == 'n') 
-                        hexagon.setFillColor(sf::Color::Green);
-                else if (map[current_i].status == 't')
-                        hexagon.setFillColor(sf::Color::Red);
-                else if (map[current_i].status == 'm')
-                        hexagon.setFillColor(sf::Color(160, 32, 240));
+                if (map[current_i].status == 'w')
+                    hexagon.setFillColor(sf::Color::Blue);//water закрита зона
+                else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
+                    hexagon.setFillColor(sf::Color(128, 128, 128));
+                else if (map[current_i].status == 'n')//nature лісові клітинки
+                    hexagon.setFillColor(sf::Color::Green);
+                else if (map[current_i].status == 't')//tower башні
+                    hexagon.setFillColor(sf::Color(76,28,36));
+                else if (map[current_i].status == 'm')//mechanics 
+                    hexagon.setFillColor(sf::Color(160, 32, 240));
+                else if(map[current_i].status == 'a')//aurum
+                    hexagon.setFillColor(sf::Color::Yellow);
+                else if (map[current_i].status == 'e')//etherium
+                    hexagon.setFillColor(sf::Color(255, 192, 203));
+                else if (map[current_i].status == 'p')//pandorium
+                    hexagon.setFillColor(sf::Color::Red);
                 window.draw(hexagon);
                 sign = -sign;
                 g = current_i;
             }
             startX += side * sqrt(3);
-            
+
         }
-        
+
         startY += 3 * side;
         startX -= side * sqrt(3) / 2;
         verticalSpacing = 3 * side;
