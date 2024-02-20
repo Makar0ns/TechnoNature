@@ -88,8 +88,23 @@ void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical, 
 }
 int main()
 {
-
-
+    sf::Texture water;
+    sf::Texture nature;
+    sf::Texture robot;
+    sf::Texture pandorium;
+    sf::Texture etherium;
+    sf::Texture tower_default;
+    sf::Texture gray;
+    sf::Texture aurum;
+    water.loadFromFile("images/water_bg.png");
+    nature.loadFromFile("images/nature.png");
+    robot.loadFromFile("images/robot.png");
+    pandorium.loadFromFile("images/pandorium.png");
+    etherium.loadFromFile("images/etherium.png");
+    tower_default.loadFromFile("images/tower_default.png");
+    gray.loadFromFile("images/Solid_gray.png");
+    aurum.loadFromFile("images/gold.png");
+    
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
     while (window.isOpen())
     {
@@ -111,6 +126,7 @@ int main()
         int g;
         create_map(numberOfHexagons_horizontal, numberOfHexagons_vertical, map);
         sf::CircleShape hexagon(side, 6);
+        hexagon.setFillColor(sf::Color::White);
         hexagon.setOutlineThickness(2);
         hexagon.setOutlineColor(sf::Color::Black);
         for (int j = 0; j < numberOfHexagons_horizontal - 1; ++j)
@@ -133,21 +149,21 @@ int main()
                 }
                 map[current_i].y = pos_y;
                 if (map[current_i].status == 'w')
-                    hexagon.setFillColor(sf::Color::Blue);//water закрита зона
+                    hexagon.setTexture(&water);//water закрита зона
                 else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
-                    hexagon.setFillColor(sf::Color(128, 128, 128));
+                    hexagon.setTexture(&gray);
                 else if (map[current_i].status == 'n')//nature лісові клітинки
-                    hexagon.setFillColor(sf::Color::Green);
+                    hexagon.setTexture(&nature);
                 else if (map[current_i].status == 't')//tower башні
-                    hexagon.setFillColor(sf::Color(76,28,36));
+                    hexagon.setTexture(&tower_default);
                 else if (map[current_i].status == 'm')//mechanics 
-                    hexagon.setFillColor(sf::Color(160, 32, 240));
-                else if(map[current_i].status == 'a')//aurum
-                    hexagon.setFillColor(sf::Color::Yellow);
+                    hexagon.setTexture(&robot);
+                else if (map[current_i].status == 'a')//aurum
+                    hexagon.setTexture(&aurum);
                 else if (map[current_i].status == 'e')//etherium
-                    hexagon.setFillColor(sf::Color(255, 192, 203));
+                    hexagon.setTexture(&etherium);
                 else if (map[current_i].status == 'p')//pandorium
-                    hexagon.setFillColor(sf::Color::Red);
+                    hexagon.setTexture(&pandorium);
                 window.draw(hexagon);
                 sign = -sign;
                 g = current_i;
@@ -166,15 +182,16 @@ int main()
             map[g].y = startY + k * verticalSpacing;
             g++;
             current_i = g;
-            if (map[current_i].status == 'w') hexagon.setFillColor(sf::Color::Blue);
-            else if (map[current_i].status == 'g')
-                hexagon.setFillColor(sf::Color(128, 128, 128));
-            else if (map[current_i].status == 'n')
-                hexagon.setFillColor(sf::Color::Green);
-            else if (map[current_i].status == 't')
-                hexagon.setFillColor(sf::Color::Red);
-            else if (map[current_i].status == 'm')
-                hexagon.setFillColor(sf::Color(160, 32, 240));
+             if (map[current_i].status == 'w')
+                    hexagon.setTexture(&water);//water закрита зона
+                else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
+                    hexagon.setTexture(&gray);
+                else if (map[current_i].status == 'n')//nature лісові клітинки
+                    hexagon.setTexture(&nature);
+                else if (map[current_i].status == 't')//tower башні
+                    hexagon.setTexture(&tower_default);
+                else if (map[current_i].status == 'm')//mechanics 
+                    hexagon.setTexture(&robot);
             window.draw(hexagon);
         }
         window.display();
