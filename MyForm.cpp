@@ -9,6 +9,10 @@ struct Tile
     char structure;
 };
 Tile map[tile_cnt];
+
+
+
+
 void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical, Tile map[])
 {
     for (int i = 0; i < tile_cnt; ++i)
@@ -86,6 +90,64 @@ void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical, 
     map[220].status = 'p';
     map[237].status = 'g';
 }
+
+class Townhall
+{
+private:
+    int side = 35;
+    char team;
+    bool is_destroyed = false;
+    int hp = 1;
+    int i = 0;
+    int income_aurum = 1;
+    int income_etherium = 1;
+    int income_pandorium = 1;
+    int aurum = 1;
+    int etherium = 1;
+    int pandorium = 1;
+    int cnt_workers = 1;
+    sf::CircleShape hexagon;
+    sf::Texture texture;
+
+public:
+    Townhall(int in_i,char team_in)
+    {
+        i = in_i;
+        team = team_in;
+    }
+    void draw(sf::RenderWindow& window)
+    {
+        sf::CircleShape hexagon(side, 6);
+        if(team == 'n') 
+            texture.loadFromFile("Images\\tower_nature.png");
+        else texture.loadFromFile("Images\\tower_robot.png");
+        hexagon.setPosition(map[i].x, map[i].y);
+        hexagon.setTexture(&texture);
+        window.draw(hexagon);
+    }
+    void change_hp(int damage)
+    {
+        hp -= damage;
+        if (hp < 1) is_destroyed = true;
+    }
+    void change_income_aurum(int cnt_workers, int cnt_mineschaft_aurum)
+    {
+        income_aurum = cnt_workers + cnt_mineschaft_aurum * 4;
+        aurum += income_aurum;
+    }
+    void change_income_etherium(int mineschaft_etherium)
+    {
+        income_etherium += mineschaft_etherium;
+        etherium += income_etherium;
+    }
+    void change_income_pandorium(int mineschaft_pandorium)
+    {
+        income_pandorium += mineschaft_pandorium;
+        pandorium += income_pandorium;
+    }
+
+};
+
 int main()
 {
     sf::Texture water;
@@ -104,7 +166,7 @@ int main()
     tower_default.loadFromFile("images/tower_default.png");
     gray.loadFromFile("images/Solid_gray.png");
     aurum.loadFromFile("images/gold.png");
-    
+
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
     while (window.isOpen())
     {
@@ -182,18 +244,24 @@ int main()
             map[g].y = startY + k * verticalSpacing;
             g++;
             current_i = g;
-             if (map[current_i].status == 'w')
-                    hexagon.setTexture(&water);//water закрита зона
-                else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
-                    hexagon.setTexture(&gray);
-                else if (map[current_i].status == 'n')//nature лісові клітинки
-                    hexagon.setTexture(&nature);
-                else if (map[current_i].status == 't')//tower башні
-                    hexagon.setTexture(&tower_default);
-                else if (map[current_i].status == 'm')//mechanics 
-                    hexagon.setTexture(&robot);
+            if (map[current_i].status == 'w')
+                hexagon.setTexture(&water);//water закрита зона
+            else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
+                hexagon.setTexture(&gray);
+            else if (map[current_i].status == 'n')//nature лісові клітинки
+                hexagon.setTexture(&nature);
+            else if (map[current_i].status == 't')//tower башні
+                hexagon.setTexture(&tower_default);
+            else if (map[current_i].status == 'm')//mechanics 
+                hexagon.setTexture(&robot);
             window.draw(hexagon);
         }
+        int aurum = 5;
+        Townhall townhall(8, 'n');
+        townhall.draw(window);
+        Townhall townhall2(274, 'm');
+        townhall2.draw(window);
+
         window.display();
     }
     return 0;
