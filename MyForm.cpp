@@ -1,4 +1,4 @@
-#include <SFML/Graphics.hpp>
+    #include <SFML/Graphics.hpp>
 #include <iostream>
 const int tile_cnt = 300;
 struct Tile
@@ -9,7 +9,7 @@ struct Tile
     char structure;
 };
 Tile map[tile_cnt];
-
+const int side = 35;
 
 
 
@@ -90,66 +90,13 @@ void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical, 
     map[220].status = 'p';
     map[237].status = 'g';
 }
-
-class Townhall
+void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_vertical, int sign,float startX,float startY, sf::RenderWindow& window)
 {
-private:
-    int side = 35;
-    char team;
-    bool is_destroyed = false;
-    int hp = 1;
-    int i = 0;
-    int income_aurum = 1;
-    int income_etherium = 1;
-    int income_pandorium = 1;
-    int aurum = 1;
-    int etherium = 1;
-    int pandorium = 1;
-    int cnt_workers = 1;
-    sf::CircleShape hexagon;
-    sf::Texture texture;
-
-public:
-    Townhall(int in_i,char team_in)
-    {
-        i = in_i;
-        team = team_in;
-    }
-    void draw(sf::RenderWindow& window)
-    {
-        sf::CircleShape hexagon(side, 6);
-        if(team == 'n') 
-            texture.loadFromFile("Images\\tower_nature.png");
-        else texture.loadFromFile("Images\\tower_robot.png");
-        hexagon.setPosition(map[i].x, map[i].y);
-        hexagon.setTexture(&texture);
-        window.draw(hexagon);
-    }
-    void change_hp(int damage)
-    {
-        hp -= damage;
-        if (hp < 1) is_destroyed = true;
-    }
-    void change_income_aurum(int cnt_workers, int cnt_mineschaft_aurum)
-    {
-        income_aurum = cnt_workers + cnt_mineschaft_aurum * 4;
-        aurum += income_aurum;
-    }
-    void change_income_etherium(int mineschaft_etherium)
-    {
-        income_etherium += mineschaft_etherium;
-        etherium += income_etherium;
-    }
-    void change_income_pandorium(int mineschaft_pandorium)
-    {
-        income_pandorium += mineschaft_pandorium;
-        pandorium += income_pandorium;
-    }
-
-};
-
-int main()
-{
+    float pos_y, pos_x;
+    int current_i;
+    float horizontalSpacing = side * sqrt(3) / 2;
+    float verticalSpacing = 1.5 * side;
+    int g;
     sf::Texture water;
     sf::Texture nature;
     sf::Texture robot;
@@ -165,7 +112,219 @@ int main()
     etherium.loadFromFile("images/etherium.png");
     tower_default.loadFromFile("images/tower_default.png");
     gray.loadFromFile("images/Solid_gray.png");
-    aurum.loadFromFile("images/gold.png");
+    aurum.loadFromFile("images/gold_mine.png");
+    sf::CircleShape hexagon(side, 6);
+    hexagon.setFillColor(sf::Color::White);
+    hexagon.setOutlineThickness(2);
+    hexagon.setOutlineColor(sf::Color::Black);
+    for (int j = 0; j < numberOfHexagons_horizontal - 1; ++j)
+    {
+        sign = -1;
+        for (int i = 1; i <= numberOfHexagons_vertical; ++i)
+        {
+            pos_y = startY + i * verticalSpacing;
+            current_i = i + j * numberOfHexagons_horizontal;
+            if (sign == 1)
+            {
+                pos_x = startX - horizontalSpacing;
+                hexagon.setPosition(pos_x, pos_y);
+                map[current_i].x = pos_x;
+            }
+            else
+            {
+                hexagon.setPosition(startX, pos_y);
+                map[current_i].x = startX;
+            }
+            map[current_i].y = pos_y;
+            if (map[current_i].status == 'w')
+                hexagon.setTexture(&water);//water закрита зона
+            else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
+                hexagon.setTexture(&gray);
+            else if (map[current_i].status == 'n')//nature лісові клітинки
+                hexagon.setTexture(&nature);
+            else if (map[current_i].status == 't')//tower башні
+                hexagon.setTexture(&tower_default);
+            else if (map[current_i].status == 'm')//mechanics 
+                hexagon.setTexture(&robot);
+            else if (map[current_i].status == 'a')//aurum
+                hexagon.setTexture(&aurum);
+            else if (map[current_i].status == 'e')//etherium
+                hexagon.setTexture(&etherium);
+            else if (map[current_i].status == 'p')//pandorium
+                hexagon.setTexture(&pandorium);
+            window.draw(hexagon);
+            sign = -sign;
+            g = current_i;
+        }
+        startX += side * sqrt(3);
+
+    }
+    startY += 3 * side;
+    startX -= side * sqrt(3) / 2;
+    verticalSpacing = 3 * side;
+    for (int k = 0; k < numberOfHexagons_vertical / 2; ++k)
+    {
+        hexagon.setPosition(startX, startY + k * verticalSpacing);
+        map[g].x = startX;
+        map[g].y = startY + k * verticalSpacing;
+        g++;
+        current_i = g;
+        if (map[current_i].status == 'w')
+            hexagon.setTexture(&water);//water закрита зона
+        else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
+            hexagon.setTexture(&gray);
+        else if (map[current_i].status == 'n')//nature лісові клітинки
+            hexagon.setTexture(&nature);
+        else if (map[current_i].status == 't')//tower башні
+            hexagon.setTexture(&tower_default);
+        else if (map[current_i].status == 'm')//mechanics 
+            hexagon.setTexture(&robot);
+        window.draw(hexagon);
+    }
+}
+class Hut
+{
+private:
+    int side;
+    int hp;
+    char team;
+    bool is_destroyed;
+    int i;
+    int unit_tier;
+    int build_price=5;
+    sf::Texture texture;
+    sf::CircleShape hexagon;
+    sf::Text text;
+    sf::Font font;
+    sf::Clock clock;
+public:
+    Hut(int in_i, char team_in,int in_side)
+    {
+        i = in_i;
+        team = team_in;
+        side = in_side;
+        font.loadFromFile("Fonts\\file.ttf");
+        text.setFont(font);
+        
+    }
+    void buy(sf::RenderWindow& window,int balance_gold)
+    {
+        if (balance_gold >= build_price)
+        {
+            sf::CircleShape hexagon(side, 6);
+            if (team == 'n')
+                texture.loadFromFile("Images\\barracks_nature.png");
+            else texture.loadFromFile("Images\\barracks_robot.png");
+            hexagon.setPosition(map[i].x, map[i].y);
+            hexagon.setTexture(&texture);
+            window.draw(hexagon);
+        }
+        else
+        {
+            bool showText;
+            text.setCharacterSize(24);
+            text.setString("NOT ENOUGH RESOURSES");
+            text.setFillColor(sf::Color::Red);
+            text.move(0, 0);
+            window.draw(text);
+            if (clock.getElapsedTime().asSeconds() == 3)
+            {
+                text.setFillColor(sf::Color::Black);
+                window.draw(text);
+                window.display();
+            }
+        
+
+            
+        }
+        
+        
+    }
+    void change_hp(int damage)
+    {
+        hp -= damage;
+        if (hp < 1) is_destroyed = true;
+    }
+
+    
+
+
+
+};
+
+class Townhall
+{
+private:
+    int side;
+    char team;
+    bool is_destroyed = false;
+    int hp = 10;
+    int i = 0;
+    int income_aurum = 1;
+    int income_etherium = 0;
+    int income_pandorium = 0;
+    int balance_gold = 4;
+    int balance_etherium = 0;
+    int balance_pandorium = 0;
+    int cnt_workers = 1;
+    sf::CircleShape hexagon;
+    sf::Texture texture;
+
+public:
+    Townhall(int in_i, char team_in,int in_side)
+    {
+        i = in_i;
+        team = team_in;
+        side = in_side;
+    }
+    void draw(sf::RenderWindow& window)
+    {
+        sf::CircleShape hexagon(side, 6);
+        if (team == 'n')
+            texture.loadFromFile("Images\\tower_nature.png");
+        else texture.loadFromFile("Images\\tower_robot.png");
+        hexagon.setPosition(map[i].x, map[i].y);
+        hexagon.setTexture(&texture);
+        window.draw(hexagon);
+    }
+    void change_hp(int damage)
+    {
+        hp -= damage;
+        if (hp < 1) is_destroyed = true;
+    }
+    int is_destroyed_return()
+    {
+        return is_destroyed;
+    }
+    void change_income_aurum(int cnt_workers, int cnt_mineschaft_aurum)
+    {
+        income_aurum = cnt_workers + cnt_mineschaft_aurum * 4;
+    }
+    void change_income_etherium(int mineschaft_etherium)
+    {
+        income_etherium += mineschaft_etherium;
+    }
+    void change_income_pandorium(int mineschaft_pandorium)
+    {
+        income_pandorium += mineschaft_pandorium;
+    }
+    int return_balance_gold()
+    {
+        return balance_gold;
+    }
+    int return_balance_etherium()
+    {
+        return balance_etherium;
+    }
+    int return_balance_pandorium()
+    {
+        return balance_pandorium;
+    }
+
+};
+int main()
+{
+    
 
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
     while (window.isOpen())
@@ -177,91 +336,23 @@ int main()
                 window.close();
         }
         window.clear();
-        int side = 35;
+        int balance_g;
         int numberOfHexagons_horizontal = 17, numberOfHexagons_vertical = 16;
-        int sign = 1, current_i;
-        float pos_y, pos_x;
+        int sign = 1;
         float startX = 400;
-        float startY = 50;
-        float horizontalSpacing = side * sqrt(3) / 2;
-        float verticalSpacing = 1.5 * side;
-        int g;
+        float startY = 25;
+        build_map(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY, window);
         create_map(numberOfHexagons_horizontal, numberOfHexagons_vertical, map);
-        sf::CircleShape hexagon(side, 6);
-        hexagon.setFillColor(sf::Color::White);
-        hexagon.setOutlineThickness(2);
-        hexagon.setOutlineColor(sf::Color::Black);
-        for (int j = 0; j < numberOfHexagons_horizontal - 1; ++j)
-        {
-            sign = -1;
-            for (int i = 1; i <= numberOfHexagons_vertical; ++i)
-            {
-                pos_y = startY + i * verticalSpacing;
-                current_i = i + j * numberOfHexagons_horizontal;
-                if (sign == 1)
-                {
-                    pos_x = startX - horizontalSpacing;
-                    hexagon.setPosition(pos_x, pos_y);
-                    map[current_i].x = pos_x;
-                }
-                else
-                {
-                    hexagon.setPosition(startX, pos_y);
-                    map[current_i].x = startX;
-                }
-                map[current_i].y = pos_y;
-                if (map[current_i].status == 'w')
-                    hexagon.setTexture(&water);//water закрита зона
-                else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
-                    hexagon.setTexture(&gray);
-                else if (map[current_i].status == 'n')//nature лісові клітинки
-                    hexagon.setTexture(&nature);
-                else if (map[current_i].status == 't')//tower башні
-                    hexagon.setTexture(&tower_default);
-                else if (map[current_i].status == 'm')//mechanics 
-                    hexagon.setTexture(&robot);
-                else if (map[current_i].status == 'a')//aurum
-                    hexagon.setTexture(&aurum);
-                else if (map[current_i].status == 'e')//etherium
-                    hexagon.setTexture(&etherium);
-                else if (map[current_i].status == 'p')//pandorium
-                    hexagon.setTexture(&pandorium);
-                window.draw(hexagon);
-                sign = -sign;
-                g = current_i;
-            }
-            startX += side * sqrt(3);
-
-        }
-
-        startY += 3 * side;
-        startX -= side * sqrt(3) / 2;
-        verticalSpacing = 3 * side;
-        for (int k = 0; k < numberOfHexagons_vertical / 2; ++k)
-        {
-            hexagon.setPosition(startX, startY + k * verticalSpacing);
-            map[g].x = startX;
-            map[g].y = startY + k * verticalSpacing;
-            g++;
-            current_i = g;
-            if (map[current_i].status == 'w')
-                hexagon.setTexture(&water);//water закрита зона
-            else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
-                hexagon.setTexture(&gray);
-            else if (map[current_i].status == 'n')//nature лісові клітинки
-                hexagon.setTexture(&nature);
-            else if (map[current_i].status == 't')//tower башні
-                hexagon.setTexture(&tower_default);
-            else if (map[current_i].status == 'm')//mechanics 
-                hexagon.setTexture(&robot);
-            window.draw(hexagon);
-        }
-        int aurum = 5;
-        Townhall townhall(8, 'n');
-        townhall.draw(window);
-        Townhall townhall2(274, 'm');
-        townhall2.draw(window);
-
+        Townhall townhall_nature(8, 'n',side);
+        townhall_nature.draw(window);
+        Townhall townhall_robot(274, 'r',side);
+        townhall_robot.draw(window);
+        Hut barracks_nature(42, 'n', side);
+        balance_g=townhall_nature.return_balance_gold();
+        barracks_nature.buy(window,balance_g);
+        Hut barracks_robot(210, 'r', side);
+        balance_g = townhall_robot.return_balance_gold();
+        barracks_robot.buy(window,balance_g);
         window.display();
     }
     return 0;
