@@ -1,4 +1,4 @@
-    #include <SFML/Graphics.hpp>
+#include <SFML/Graphics.hpp>
 #include <iostream>
 const int tile_cnt = 300;
 struct Tile
@@ -90,7 +90,7 @@ void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical, 
     map[220].status = 'p';
     map[237].status = 'g';
 }
-void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_vertical, int sign,float startX,float startY, sf::RenderWindow& window)
+void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_vertical, int sign, float startX, float startY, sf::RenderWindow& window)
 {
     float pos_y, pos_x;
     int current_i;
@@ -112,7 +112,7 @@ void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_v
     etherium.loadFromFile("images/etherium.png");
     tower_default.loadFromFile("images/tower_default.png");
     gray.loadFromFile("images/Solid_gray.png");
-    aurum.loadFromFile("images/gold_mine.png");
+    aurum.loadFromFile("images/gold.png");
     sf::CircleShape hexagon(side, 6);
     hexagon.setFillColor(sf::Color::White);
     hexagon.setOutlineThickness(2);
@@ -140,6 +140,8 @@ void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_v
                 hexagon.setTexture(&water);//water закрита зона
             else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
                 hexagon.setTexture(&gray);
+
+
             else if (map[current_i].status == 'n')//nature лісові клітинки
                 hexagon.setTexture(&nature);
             else if (map[current_i].status == 't')//tower башні
@@ -191,23 +193,24 @@ private:
     bool is_destroyed;
     int i;
     int unit_tier;
-    int build_price=5;
+    int build_price = 5;
     sf::Texture texture;
     sf::CircleShape hexagon;
     sf::Text text;
     sf::Font font;
-    sf::Clock clock;
+
+
+
 public:
-    Hut(int in_i, char team_in,int in_side)
+    Hut(int in_i, char team_in, int in_side)
     {
         i = in_i;
         team = team_in;
         side = in_side;
-        font.loadFromFile("Fonts\\file.ttf");
-        text.setFont(font);
-        
+
+
     }
-    void buy(sf::RenderWindow& window,int balance_gold)
+    void buy(sf::RenderWindow& window, int balance_gold, sf::Clock& clock)
     {
         if (balance_gold >= build_price)
         {
@@ -221,24 +224,23 @@ public:
         }
         else
         {
-            bool showText;
+            sf::RectangleShape rect(sf::Vector2f(0, 0));
+            rect.setFillColor(sf::Color::Black);
+            rect.setSize(sf::Vector2f(400, 100));
+            font.loadFromFile("Fonts/file.ttf");
+            text.setFont(font);
             text.setCharacterSize(24);
             text.setString("NOT ENOUGH RESOURSES");
             text.setFillColor(sf::Color::Red);
             text.move(0, 0);
             window.draw(text);
-            if (clock.getElapsedTime().asSeconds() == 3)
+            if (clock.getElapsedTime().asSeconds() >= 3)
             {
-                text.setFillColor(sf::Color::Black);
-                window.draw(text);
-                window.display();
+                window.draw(rect);
             }
-        
-
-            
         }
-        
-        
+
+
     }
     void change_hp(int damage)
     {
@@ -246,12 +248,11 @@ public:
         if (hp < 1) is_destroyed = true;
     }
 
-    
+
 
 
 
 };
-
 class Townhall
 {
 private:
@@ -263,15 +264,16 @@ private:
     int income_aurum = 1;
     int income_etherium = 0;
     int income_pandorium = 0;
-    int balance_gold = 4;
+    int balance_gold = 3;
     int balance_etherium = 0;
     int balance_pandorium = 0;
     int cnt_workers = 1;
     sf::CircleShape hexagon;
     sf::Texture texture;
 
+
 public:
-    Townhall(int in_i, char team_in,int in_side)
+    Townhall(int in_i, char team_in, int in_side)
     {
         i = in_i;
         team = team_in;
@@ -322,11 +324,61 @@ public:
     }
 
 };
+
+class Entity
+{
+private:
+    char team;
+    int i;
+    int unit_tier;
+    int hp;
+    int i_nature;
+    sf::Sprite unit;
+    sf::Texture texture;
+    sf::Texture grey;
+
+public:
+    Entity(char in_team, int in_i, int unit_tier_in, int hp_in)
+    {
+        i = in_i;
+        team = in_team;
+        unit_tier = unit_tier_in;
+        hp = hp_in;
+    }
+    void spawn(sf::RenderWindow& window)
+    {
+        if (unit_tier == 0)
+        {
+            texture.loadFromFile("images/robot_unit.png");
+            unit.setTexture(texture);
+        }
+        unit.setScale(0.19, 0.19);
+        unit.setPosition(map[i].x + side / 5 + 3, map[i].y + side / 5 + 1);
+        window.draw(unit);
+    }
+    void move(int i_move, sf::Clock& clock, sf::RenderWindow& window)
+    {
+        sf::CircleShape hexagon(side, 6);
+        hexagon.setOutlineThickness(2);
+        hexagon.setOutlineColor(sf::Color::Black);
+        grey.loadFromFile("images/Solid_gray.png");
+        hexagon.setPosition(map[i].x, map[i].y);
+        hexagon.setTexture(&grey);
+        window.draw(hexagon);
+        unit.setPosition(map[i_move].x + side / 5 + 3, map[i_move].y + side / 5);
+        window.draw(unit);
+        i = i_move;
+    }
+};
+
+
 int main()
 {
-    
 
+
+    sf::Clock clock;
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -343,17 +395,24 @@ int main()
         float startY = 25;
         build_map(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY, window);
         create_map(numberOfHexagons_horizontal, numberOfHexagons_vertical, map);
-        Townhall townhall_nature(8, 'n',side);
+        Townhall townhall_nature(8, 'n', side);
         townhall_nature.draw(window);
-        Townhall townhall_robot(274, 'r',side);
+        Townhall townhall_robot(274, 'r', side);
         townhall_robot.draw(window);
         Hut barracks_nature(42, 'n', side);
-        balance_g=townhall_nature.return_balance_gold();
-        barracks_nature.buy(window,balance_g);
+        balance_g = townhall_nature.return_balance_gold();
+        barracks_nature.buy(window, balance_g, clock);
         Hut barracks_robot(210, 'r', side);
         balance_g = townhall_robot.return_balance_gold();
-        barracks_robot.buy(window,balance_g);
+        barracks_robot.buy(window, balance_g, clock);
+        Entity rabotyaga('n', 9, 0, 60);
+        rabotyaga.spawn(window);
+        if (clock.getElapsedTime().asSeconds() >= 5)
+            rabotyaga.move(25, clock, window);
+        if (clock.getElapsedTime().asSeconds() >= 6)
+            rabotyaga.move(8, clock, window);
         window.display();
+
     }
     return 0;
 }
