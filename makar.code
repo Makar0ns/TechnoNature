@@ -137,14 +137,14 @@
                 }
                 map[current_i].y = pos_y;
                 if (map[current_i].status == 'w')
-                    hexagon.setTexture(&water);//water закрита зона
-                else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
+                    hexagon.setTexture(&water);//water Г§Г ГЄГ°ГЁГІГ  Г§Г®Г­Г 
+                else if (map[current_i].status == 'g')//empty ГЇГіГ±ГІВі ГЄГ«ВіГІГЁГ­ГЄГЁ ГїГЄВі Г¬Г®Г¦ГіГІГј ГЎГіГІГЁ Г§Г ГЇГ®ГўГ­ГҐГ­Ві
                     hexagon.setTexture(&gray);
 
 
-                else if (map[current_i].status == 'n')//nature лісові клітинки
+                else if (map[current_i].status == 'n')//nature Г«ВіГ±Г®ГўВі ГЄГ«ВіГІГЁГ­ГЄГЁ
                     hexagon.setTexture(&nature);
-                else if (map[current_i].status == 't')//tower башні
+                else if (map[current_i].status == 't')//tower ГЎГ ГёГ­Ві
                     hexagon.setTexture(&tower_default);
                 else if (map[current_i].status == 'm')//mechanics 
                     hexagon.setTexture(&robot);
@@ -172,12 +172,12 @@
             g++;
             current_i = g;
             if (map[current_i].status == 'w')
-                hexagon.setTexture(&water);//water закрита зона
-            else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
+                hexagon.setTexture(&water);//water Г§Г ГЄГ°ГЁГІГ  Г§Г®Г­Г 
+            else if (map[current_i].status == 'g')//empty ГЇГіГ±ГІВі ГЄГ«ВіГІГЁГ­ГЄГЁ ГїГЄВі Г¬Г®Г¦ГіГІГј ГЎГіГІГЁ Г§Г ГЇГ®ГўГ­ГҐГ­Ві
                 hexagon.setTexture(&gray);
-            else if (map[current_i].status == 'n')//nature лісові клітинки
+            else if (map[current_i].status == 'n')//nature Г«ВіГ±Г®ГўВі ГЄГ«ВіГІГЁГ­ГЄГЁ
                 hexagon.setTexture(&nature);
-            else if (map[current_i].status == 't')//tower башні
+            else if (map[current_i].status == 't')//tower ГЎГ ГёГ­Ві
                 hexagon.setTexture(&tower_default);
             else if (map[current_i].status == 'm')//mechanics 
                 hexagon.setTexture(&robot);
