@@ -10,9 +10,7 @@ struct Tile
 };
 Tile map[tile_cnt];
 const int side = 35;
-
-
-
+const int hor_space = side / 5 + 3, ver_space = side / 5;
 void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical, Tile map[])
 {
     for (int i = 0; i < tile_cnt; ++i)
@@ -90,6 +88,47 @@ void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical, 
     map[220].status = 'p';
     map[237].status = 'g';
 }
+void create_map_coords(int side, int numberOfHexagons_horizontal, int numberOfHexagons_vertical, int sign, float startX, float startY)
+{
+    float pos_y, pos_x;
+    int current_i;
+    float horizontalSpacing = side * sqrt(3) / 2;
+    float verticalSpacing = 1.5 * side;
+    int g;
+    for (int j = 0; j < numberOfHexagons_horizontal - 1; ++j)
+    {
+        sign = -1;
+        for (int i = 1; i <= numberOfHexagons_vertical; ++i)
+        {
+            pos_y = startY + i * verticalSpacing;
+            current_i = i + j * numberOfHexagons_horizontal;
+            if (sign == 1)
+            {
+                pos_x = startX - horizontalSpacing;
+                map[current_i].x = pos_x;
+            }
+            else
+            {
+                map[current_i].x = startX;
+            }
+            map[current_i].y = pos_y;
+            sign = -sign;
+            g = current_i;
+        }
+        startX += side * sqrt(3);
+
+    }
+    startY += 3 * side;
+    startX -= side * sqrt(3) / 2;
+    verticalSpacing = 3 * side;
+    for (int k = 0; k < numberOfHexagons_vertical / 2; ++k)
+    {
+        map[g].x = startX;
+        map[g].y = startY + k * verticalSpacing;
+        g++;
+        current_i = g;
+    }
+}
 void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_vertical, int sign, float startX, float startY, sf::RenderWindow& window)
 {
     float pos_y, pos_x;
@@ -106,12 +145,12 @@ void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_v
     sf::Texture gray;
     sf::Texture aurum;
     water.loadFromFile("images/water_bg.png");
-    nature.loadFromFile("images/nature_bg.png");
-    robot.loadFromFile("images/robbg.png");
+    nature.loadFromFile("images/nature.png");
+    robot.loadFromFile("images/robot.png");
     pandorium.loadFromFile("images/pandorium.png");
     etherium.loadFromFile("images/etherium.png");
     tower_default.loadFromFile("images/tower_default.png");
-    gray.loadFromFile("images/Grey.png");
+    gray.loadFromFile("images/Solid_gray.png");
     aurum.loadFromFile("images/gold_mine.png");
     sf::CircleShape hexagon(side, 6);
     hexagon.setFillColor(sf::Color::White);
@@ -128,23 +167,18 @@ void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_v
             {
                 pos_x = startX - horizontalSpacing;
                 hexagon.setPosition(pos_x, pos_y);
-                map[current_i].x = pos_x;
             }
             else
             {
                 hexagon.setPosition(startX, pos_y);
-                map[current_i].x = startX;
             }
-            map[current_i].y = pos_y;
             if (map[current_i].status == 'w')
-                hexagon.setTexture(&water);//water çàêðèòà çîíà
-            else if (map[current_i].status == 'g')//empty ïóñò³ êë³òèíêè ÿê³ ìîæóòü áóòè çàïîâíåí³
+                hexagon.setTexture(&water);//water закрита зона
+            else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
                 hexagon.setTexture(&gray);
-
-
-            else if (map[current_i].status == 'n')//nature ë³ñîâ³ êë³òèíêè
+            else if (map[current_i].status == 'n')//nature лісові клітинки
                 hexagon.setTexture(&nature);
-            else if (map[current_i].status == 't')//tower áàøí³
+            else if (map[current_i].status == 't')//tower башні
                 hexagon.setTexture(&tower_default);
             else if (map[current_i].status == 'm')//mechanics 
                 hexagon.setTexture(&robot);
@@ -167,23 +201,51 @@ void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_v
     for (int k = 0; k < numberOfHexagons_vertical / 2; ++k)
     {
         hexagon.setPosition(startX, startY + k * verticalSpacing);
-        map[g].x = startX;
-        map[g].y = startY + k * verticalSpacing;
         g++;
         current_i = g;
         if (map[current_i].status == 'w')
-            hexagon.setTexture(&water);//water çàêðèòà çîíà
-        else if (map[current_i].status == 'g')//empty ïóñò³ êë³òèíêè ÿê³ ìîæóòü áóòè çàïîâíåí³
+            hexagon.setTexture(&water);//water закрита зона
+        else if (map[current_i].status == 'g')//empty пусті клітинки які можуть бути заповнені
             hexagon.setTexture(&gray);
-        else if (map[current_i].status == 'n')//nature ë³ñîâ³ êë³òèíêè
+        else if (map[current_i].status == 'n')//nature лісові клітинки
             hexagon.setTexture(&nature);
-        else if (map[current_i].status == 't')//tower áàøí³
+        else if (map[current_i].status == 't')//tower башні
             hexagon.setTexture(&tower_default);
         else if (map[current_i].status == 'm')//mechanics 
             hexagon.setTexture(&robot);
         window.draw(hexagon);
     }
 }
+class fence
+{
+private:
+    int side;
+    int hp;
+    char team;
+    int i;
+public:
+    fence(int in_i, char team_in, int in_side)
+    {
+        i = in_i;
+        team = team_in;
+        side = in_side;
+    }
+};
+class defense_tower
+{
+private:
+    int side;
+    int hp;
+    char team;
+    int i;
+public:
+    defense_tower(int in_i, char team_in, int in_side)
+    {
+        i = in_i;
+        team = team_in;
+        side = in_side;
+    }
+};
 class Hut
 {
 private:
@@ -239,20 +301,64 @@ public:
                 window.draw(rect);
             }
         }
-
-
     }
     void change_hp(int damage)
     {
         hp -= damage;
         if (hp < 1) is_destroyed = true;
     }
+};
+class Entity
+{
+private:
+    char team;
+    int i;
+    int unit_tier;
+    int hp;
+    int i_nature;
+    sf::Sprite unit;
+    sf::Texture texture;
+    sf::Texture grey;
 
-
+public:
+    Entity(char in_team, int in_i, int unit_tier_in, int hp_in)
+    {
+        i = in_i;
+        team = in_team;
+        unit_tier = unit_tier_in;
+        hp = hp_in;
+    }
+    void spawn()
+    {
+        if (unit_tier == 0)
+        {
+            texture.loadFromFile("images/robot_worker.png");
+        }
+        unit.setTexture(texture);
+        unit.setScale(0.19, 0.19);
+        unit.setPosition(map[i].x + hor_space, map[i].y + ver_space);
+    }
+    sf::Sprite return_drawing()
+    {
+        return unit;
+    }
+    int return_i()
+    {
+        return i;
+    }
+    void set_drawing(sf::Sprite s)
+    {
+        unit = s;
+    }
+    void change_i(int i_change)
+    {
+        i = i_change;
+    }
 
 
 
 };
+
 class Townhall
 {
 private:
@@ -264,13 +370,12 @@ private:
     int income_aurum = 1;
     int income_etherium = 0;
     int income_pandorium = 0;
-    int balance_gold = 3;
+    int balance_gold = 4;
     int balance_etherium = 0;
     int balance_pandorium = 0;
     int cnt_workers = 1;
     sf::CircleShape hexagon;
     sf::Texture texture;
-
 
 public:
     Townhall(int in_i, char team_in, int in_side)
@@ -324,68 +429,38 @@ public:
     }
 
 };
-
-class Entity
-{
-private:
-    char team;
-    int i;
-    int unit_tier;
-    int hp;
-    int i_nature;
-    sf::Sprite unit;
-    sf::Texture texture;
-    sf::Texture grey;
-
-public:
-    Entity(char in_team, int in_i, int unit_tier_in, int hp_in)
-    {
-        i = in_i;
-        team = in_team;
-        unit_tier = unit_tier_in;
-        hp = hp_in;
-    }
-    void spawn()
-    {
-        if (unit_tier == 0)
-        {
-            texture.loadFromFile("images/robot_unit.png");
-        }
-        unit.setTexture(texture);
-        unit.setScale(0.19, 0.19);
-        
-    }
-    sf::Sprite return_drawing()
-    {
-        return unit;
-    }
-    
-
-};
-
-
 int main()
 {
-
-
     sf::Clock clock;
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
     bool is_move = false;
+    bool spawned = true;
     float dx = 0, dy = 0;
+    
+    int balance_g;
+    int numberOfHexagons_horizontal = 17, numberOfHexagons_vertical = 16;
+    int sign = 1;
+    float startX = 400;
+    float startY = 25;
+    float left_border = startX - side, upper_border = startY - side + 1;
+    float right_border = startX + side * (numberOfHexagons_horizontal - 1) * 2, down_border = startY + side * numberOfHexagons_vertical * 1.5 - side;
+    create_map(numberOfHexagons_horizontal, numberOfHexagons_vertical, map);
+    create_map_coords(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY);
     sf::Sprite s;
-    Entity rabotyaga('n', 9, 0, 60);
-    rabotyaga.spawn();
-    s = rabotyaga.return_drawing();
+    Entity robot_w('n', 8, 0, 60);
+    robot_w.spawn();
+    s = robot_w.return_drawing();
     while (window.isOpen())
     {
         sf::Vector2i pos = sf::Mouse::getPosition(window);
         sf::Event event;
-       
+
         while (window.pollEvent(event))
         {
 
             if (event.type == sf::Event::Closed)
                 window.close();
+
             if (event.type == sf::Event::MouseButtonPressed)
             {
                 if (event.key.code == sf::Mouse::Left)
@@ -411,54 +486,107 @@ int main()
             }
             if (event.type == sf::Event::KeyPressed)
             {
-                if (event.key.code == sf::Keyboard::Z)
-                {
-                    s.move((sqrt(3) * side * cos(120.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(120.0f * 3.14159f / 180.0f)));
-                }
-                else if (event.key.code == sf::Keyboard::X)
-                {
-                    s.move((sqrt(3) *side * cos(60.0f * 3.14159f / 180.0f)), (sqrt(3) *side * sin(60.0f * 3.14159f / 180.0f)));
-                }
-                else if (event.key.code == sf::Keyboard::A)
-                {
-                    s.move((sqrt(3) * side * cos(180.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(180.0f * 3.14159f / 180.0f)));
-                }
-                else if (event.key.code == sf::Keyboard::W)
-                {
-                    s.move((sqrt(3) * side * cos(240.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(240.0f * 3.14159f / 180.0f)));
-                }
-                else if (event.key.code == sf::Keyboard::E)
-                {
-                    s.move((sqrt(3) * side * cos(300.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(300.0f * 3.14159f / 180.0f)));
-                }
-                else if (event.key.code == sf::Keyboard::D)
-                {
-                    s.move((sqrt(3) * side * cos(0.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(0.0f * 3.14159f / 180.0f)));
-                }
-            }
-        }
-        if (is_move) s.setPosition(pos.x - dx, pos.y - dy);
-        window.clear();
-        int balance_g;
-        int numberOfHexagons_horizontal = 17, numberOfHexagons_vertical = 16;
-        int sign = 1;
-        float startX = 400;
-        float startY = 25;
-        build_map(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY, window);
-        create_map(numberOfHexagons_horizontal, numberOfHexagons_vertical, map);
-        Townhall townhall_nature(8, 'n', side);
-        townhall_nature.draw(window);
-        Townhall townhall_robot(274, 'r', side);
-        townhall_robot.draw(window);
-        Hut barracks_nature(42, 'n', side);
-        balance_g = townhall_nature.return_balance_gold();
-        barracks_nature.buy(window, balance_g, clock);
-        Hut barracks_robot(210, 'r', side);
-        balance_g = townhall_robot.return_balance_gold();
-        barracks_robot.buy(window, balance_g, clock);
-        window.draw(s);
-        window.display();
+                    if (event.key.code == sf::Keyboard::Z)
+                    {
+                        if (map[robot_w.return_i() + 1].status == 'g')  
+                        {
+                            s.move((sqrt(3) * side * cos(120.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(120.0f * 3.14159f / 180.0f)));
+                            robot_w.change_i(robot_w.return_i() + 1);
+                            std::cout << robot_w.return_i() << '\n';
+                        }
+                        else if (map[robot_w.return_i() - 15].status == 'g')
+                        {
+                            s.move((sqrt(3) * side * cos(120.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(120.0f * 3.14159f / 180.0f)));
+                            robot_w.change_i(robot_w.return_i() - 15);
+                            std::cout << robot_w.return_i() << '\n';
+                        }
+                    }
+                    else if (event.key.code == sf::Keyboard::X)
+                    {
+                        if (map[robot_w.return_i() + 1].status == 'g' )  
+                        {
+                            s.move((sqrt(3) * side * cos(60.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(60.0f * 3.14159f / 180.0f)));
+                            robot_w.change_i(robot_w.return_i() + 1);
+                            std::cout << robot_w.return_i() << '\n';
+                        }
+                        else if (map[robot_w.return_i() + 17].status == 'g')
+                        {
+                            s.move((sqrt(3) * side * cos(60.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(60.0f * 3.14159f / 180.0f)));
+                            robot_w.change_i(robot_w.return_i() + 17);
+                            std::cout << robot_w.return_i() << '\n';
+                        }
+                    }
+                    else if (event.key.code == sf::Keyboard::A)
+                    {
+                        if (map[robot_w.return_i() - 16].status == 'g')
+                        {
+                            s.move((sqrt(3) * side * cos(180.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(180.0f * 3.14159f / 180.0f)));
+                            robot_w.change_i(robot_w.return_i() - 16);
+                            std::cout << robot_w.return_i() << '\n';
+                        }
+                    }
+                    else if (event.key.code == sf::Keyboard::W)
+                    {
+                        if (map[robot_w.return_i() - 1].status == 'g' || map[robot_w.return_i() - 17].status == 'g')
+                        {
+                            
+                                s.move((sqrt(3) * side * cos(240.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(240.0f * 3.14159f / 180.0f)));
+                                robot_w.change_i(robot_w.return_i() - 1);
+                            
+                            std::cout << robot_w.return_i() << '\n'<< int(s.getPosition().x)<< ' '<< int(s.getPosition().y) << '\n'<< int(map[robot_w.return_i() - 1].x)<< ' '<< int(map[robot_w.return_i() - 1].y);
+                        }
+                        else if (map[robot_w.return_i() - 17].status == 'g')
+                        {
+                            s.move((sqrt(3) * side * cos(240.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(240.0f * 3.14159f / 180.0f)));
+                            robot_w.change_i(robot_w.return_i() - 17);
+                            std::cout << robot_w.return_i() << '\n';
+                        }
+                    }
+                    else if (event.key.code == sf::Keyboard::E)
+                    {
+                        if (map[robot_w.return_i() - 1].status == 'g')
+                        {
+                            s.move((sqrt(3) * side * cos(300.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(300.0f * 3.14159f / 180.0f)));
+                            robot_w.change_i(robot_w.return_i() - 1);
+                            std::cout << robot_w.return_i() << '\n';
+                        }
+                        else if (map[robot_w.return_i() + 15].status == 'g')
+                        {
+                            s.move((sqrt(3) * side * cos(300.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(300.0f * 3.14159f / 180.0f)));
+                            robot_w.change_i(robot_w.return_i() + 15);
+                            std::cout << robot_w.return_i() << '\n';
+                        }
 
+                    }
+                    else if (event.key.code == sf::Keyboard::D)
+                    {
+                        if (map[robot_w.return_i() + 16].status == 'g')
+                        {
+                            s.move((sqrt(3) * side * cos(0.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(0.0f * 3.14159f / 180.0f)));
+                            robot_w.change_i(robot_w.return_i() + 16);
+                            std::cout << robot_w.return_i() << '\n';
+                        }
+                    }
+                    robot_w.set_drawing(s);
+            }
+            if (is_move) s.setPosition(pos.x - dx, pos.y - dy);
+            robot_w.return_i();
+            window.clear();
+            build_map(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY, window);
+            Townhall townhall_nature(8, 'n', side);
+            townhall_nature.draw(window);
+            Townhall townhall_robot(274, 'r', side);
+            townhall_robot.draw(window);
+            Hut barracks_nature(42, 'n', side);
+            balance_g = townhall_nature.return_balance_gold();
+            barracks_nature.buy(window, balance_g, clock);
+            Hut barracks_robot(210, 'r', side);
+            balance_g = townhall_robot.return_balance_gold();
+            barracks_robot.buy(window, balance_g, clock);
+            window.draw(s);
+            window.display();
+
+        }
     }
     return 0;
 }
