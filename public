@@ -322,6 +322,9 @@ private:
     sf::Sprite unit;
     sf::Texture texture;
     sf::Texture grey;
+    int prev_i;
+    sf::Vector2f p;
+    bool check=true;
 
 public:
     Entity(char in_team, int in_i, int unit_tier_in, int hp_in)
@@ -353,58 +356,188 @@ public:
     {
         i = in_i;
     }
-    bool check_border_collision_Z(float left_border, float right_border, float upper_border, float down_border, sf::Sprite unit)
+    void move_Z(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit,Entity& entiy)
     {
+        check = true;
         sf::Vector2f position = unit.getPosition();
         float distance = side * sqrt(3) - 3;
-        if (position.x - distance<left_border || position.y + distance >down_border)
-            return false;
-        else return true;
+        if (position.x - distance<left_border || position.y + distance >down_border) check = false;
+        if(check)
+        {
+            p = unit.getPosition();
+            prev_i = entiy.return_i();
+            unit.move((sqrt(3) * side * cos(120.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(120.0f * 3.14159f / 180.0f)));
+            if (abs(int(unit.getPosition().x - map[entiy.return_i() + 1].x)) <= horiz_shift && abs(int(unit.getPosition().y - map[entiy.return_i() + 1].y)) <= vert_shift)
+                entiy.change(entiy.return_i() + 1);
+            else entiy.change(entiy.return_i() - 16);
+
+            if (map[entiy.return_i()].status == 'w')
+            {
+                unit.setPosition(p);
+                entiy.change(prev_i);
+
+            }
+        }
     }
-    bool check_border_collision_X(float left_border, float right_border, float upper_border, float down_border, sf::Sprite unit)
+    void move_X(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entity)
     {
+        check = true;
         sf::Vector2f position = unit.getPosition();
         float distance = side * sqrt(3) - 3;
-        if (position.x + distance > right_border || position.y + distance > down_border)
-            return false;
-        else return true;
+        if (position.x + distance > right_border || position.y + distance > down_border) check = false;
+        if (check)
+        {
+            p = unit.getPosition();
+            prev_i = entity.return_i();
+            unit.move((sqrt(3) * side * cos(60.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(60.0f * 3.14159f / 180.0f)));
+            if (abs(int(map[entity.return_i() + 1].x - unit.getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() + 1].y - unit.getPosition().y) <= vert_shift))
+                entity.change(entity.return_i() + 1);
+            else entity.change(entity.return_i() + 18);
+            if (map[entity.return_i()].status == 'w')
+            {
+                unit.setPosition(p);
+                entity.change(prev_i);
+            }
+         }
+        
     }
-    bool check_border_collision_D(float left_border, float right_border, float upper_border, float down_border, sf::Sprite unit)
+    void move_D(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entity)
     {
+        check = true;
         sf::Vector2f position = unit.getPosition();
         float distance = side * sqrt(3) + 5;
         if (position.x + distance > right_border)
-            return false;
-        else return true;
+            check = false;
+        if (check)
+        {
+            p = unit.getPosition();
+            prev_i = entity.return_i();
+            unit.move((sqrt(3) * side * cos(0.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(0.0f * 3.14159f / 180.0f)));
+            entity.change(entity.return_i() + 17);
+            if (map[entity.return_i()].status == 'w')
+            {
+                unit.setPosition(p);
+                entity.change(prev_i);
+            }
+        }
     }
-    bool check_border_collision_E(float left_border, float right_border, float upper_border, float down_border, sf::Sprite unit)
+    void move_E(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entity)
     {
+        check = true;
         sf::Vector2f position = unit.getPosition();
         float distance = side * sqrt(3), vert_distance = side * sqrt(3) * 2;
         if (position.x + distance > right_border || position.y - vert_distance < upper_border)
-            return false;
-        else return true;
+            check = false;
+        if (check)
+        {
+            p = unit.getPosition();
+            prev_i = entity.return_i();
+            unit.move((sqrt(3) * side * cos(300.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(300.0f * 3.14159f / 180.0f)));
+            if (abs(int(map[entity.return_i() - 1].x - unit.getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() - 1].y - unit.getPosition().y) <= vert_shift))
+                entity.change(entity.return_i() - 1);
+            else entity.change(entity.return_i() + 16);
+            if (map[entity.return_i()].status == 'w')
+            {
+                unit.setPosition(p);
+                entity.change(prev_i);
+
+            }
+        }
     }
-    bool check_border_collision_W(float left_border, float right_border, float upper_border, float down_border, sf::Sprite unit)
+    void move_W(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entity)
     {
+        check = true;
         sf::Vector2f position = unit.getPosition();
         float distance = side * sqrt(3), vert_distance = side * sqrt(3) * 2;
         if (position.x - distance < left_border || position.y - vert_distance < upper_border)
-            return false;
-        else return true;
+            check = false;
+        if (check)
+        {
+            p = unit.getPosition();
+            prev_i = entity.return_i();
+            unit.move((sqrt(3) * side * cos(240.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(240.0f * 3.14159f / 180.0f)));
+            if (abs(int(map[entity.return_i() - 1].x - unit.getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() - 1].y - unit.getPosition().y) <= vert_shift))
+                entity.change(entity.return_i() - 1);
+            else entity.change(entity.return_i() - 18);
+            if (map[entity.return_i()].status == 'w')
+            {
+                unit.setPosition(p);
+                entity.change(prev_i);
+
+            }
+        }
     }
-    bool check_border_collision_A(float left_border, float right_border, float upper_border, float down_border, sf::Sprite unit)
+    void move_A(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entiy)
     {
+        check = true;
         sf::Vector2f position = unit.getPosition();
         float distance = side * sqrt(3) * 1.5;
         if (position.x - distance < left_border)
-            return false;
-        else return true;
+            check = false;
+        if (check)
+        {
+            p = unit.getPosition();
+            prev_i = entiy.return_i();
+            unit.move((sqrt(3) * side * cos(180.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(180.0f * 3.14159f / 180.0f)));
+            entiy.change(entiy.return_i() - 17);
+            if (map[entiy.return_i()].status == 'w')
+            {
+                unit.setPosition(p);
+                entiy.change(prev_i);
+
+            }
+       }
     }
-
-
-
 };
+
+void instructions(sf::RenderWindow& window)
+{
+    sf::Text text1;
+    sf::Text text2;
+    sf::Text text3;
+    sf::Text text4;
+    sf::Text text5;
+    sf::Text text6;
+    sf::Font font;
+    font.loadFromFile("Fonts/file.ttf");
+    text1.setFont(font);
+    text1.setCharacterSize(18);
+    text1.setString("W - move upper left");
+    text1.setFillColor(sf::Color::White);
+    text1.move(1600, 700);
+    window.draw(text1);
+    text2.setFillColor(sf::Color::White);
+    text2.setFont(font);
+    text2.setString("E - move upper right");
+    text2.setCharacterSize(18);
+    text2.move(1600, 730);
+    window.draw(text2);
+    text3.setFont(font);
+    text3.setCharacterSize(18);
+    text3.setString("D - move right");
+    text3.setFillColor(sf::Color::White);
+    text3.move(1600, 760);
+    window.draw(text3);
+    text4.setFont(font);
+    text4.setCharacterSize(18);
+    text4.setString("X - move lower right");
+    text4.setFillColor(sf::Color::White);
+    text4.move(1600, 790);
+    window.draw(text4);
+    text5.setFont(font);
+    text5.setCharacterSize(18);
+    text5.setString("Z - move lower left");
+    text5.setFillColor(sf::Color::White);
+    text5.move(1600, 820);
+    window.draw(text5);
+    text6.setFont(font);
+    text6.setCharacterSize(18);
+    text6.setString("A - move left");
+    text6.setFillColor(sf::Color::White);
+    text6.move(1600, 850);
+    window.draw(text6);
+
+}
 
 class Townhall
 {
@@ -499,7 +632,7 @@ int main()
     tobot.spawn();
     robot_w.spawn();
     s = robot_w.return_drawing();
-    
+
     sf::Vector2f p;
     int prev_i;
     while (window.isOpen())
@@ -519,7 +652,7 @@ int main()
                // {
                     //if (s.getGlobalBounds().contains(pos.x, pos.y))
                     //{
-                        
+
                    // }
                // }
 
@@ -535,124 +668,40 @@ int main()
             {
                 if (event.key.code == sf::Keyboard::Z)
                 {
-                    if (robot_w.check_border_collision_Z(left_border, right_border, upper_border, down_border, s))
-                    {
-                           
-                            p = s.getPosition();
-                            prev_i = robot_w.return_i();
-                            s.move((sqrt(3) * side * cos(120.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(120.0f * 3.14159f / 180.0f)));
-                            if (abs(int(s.getPosition().x - map[robot_w.return_i() + 1].x)) <= horiz_shift && abs(int(s.getPosition().y - map[robot_w.return_i() + 1].y)) <= vert_shift)
-                                robot_w.change(robot_w.return_i() + 1);
-                            else robot_w.change(robot_w.return_i() - 16);
-                            
-                            if (map[robot_w.return_i()].status == 'w')
-                            {
-                                s.setPosition(p);
-                                robot_w.change(prev_i);
-                                
-                            }
-                            std::cout << robot_w.return_i() << '\n';
-                            
-                    }
+                    robot_w.move_Z(left_border, right_border, upper_border, down_border, s, robot_w);
+                        std::cout << robot_w.return_i() <<'\n';
                 }
                 else if (event.key.code == sf::Keyboard::X)
                 {
-                    if (robot_w.check_border_collision_X(left_border, right_border, upper_border, down_border, s))
-                    {
-                            p = s.getPosition();
-                            prev_i = robot_w.return_i();
-                            s.move((sqrt(3) * side * cos(60.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(60.0f * 3.14159f / 180.0f)));
-                            if (abs(int(map[robot_w.return_i() + 1].x - s.getPosition().x)) <= horiz_shift && abs(int(map[robot_w.return_i() + 1].y - s.getPosition().y) <= vert_shift))
-                                robot_w.change(robot_w.return_i() + 1);
-                            else robot_w.change(robot_w.return_i() + 18);
-                            if (map[robot_w.return_i()].status == 'w')
-                            {
-                                s.setPosition(p);
-                                robot_w.change(prev_i);
-                            
-                            }
-                            std::cout << robot_w.return_i() << '\n';
-                           
-          
-                    }
+                    robot_w.move_X(left_border, right_border, upper_border, down_border, s,robot_w);                                    
+                       std::cout << robot_w.return_i() << '\n';                 
                 }
                 else if (event.key.code == sf::Keyboard::A)
                 {
-                    if (robot_w.check_border_collision_A(left_border, right_border, upper_border, down_border, s))
-                    {
-                        p = s.getPosition();
-                        prev_i = robot_w.return_i();
-                        s.move((sqrt(3) * side * cos(180.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(180.0f * 3.14159f / 180.0f)));
-                        robot_w.change(robot_w.return_i() - 17);
-                        if (map[robot_w.return_i()].status == 'w')
-                        {
-                            s.setPosition(p);
-                            robot_w.change(prev_i);
-                           
-                        }
-                        std::cout << robot_w.return_i() << '\n';
-                    }
+                    robot_w.move_A(left_border, right_border, upper_border, down_border, s,robot_w);                                           
+                       std::cout << robot_w.return_i() << '\n';                    
                 }
                 else if (event.key.code == sf::Keyboard::W)
                 {
-                    if (robot_w.check_border_collision_W(left_border, right_border, upper_border, down_border, s))
-                    {
-                        p = s.getPosition();
-                        prev_i = robot_w.return_i();
-                        s.move((sqrt(3) * side * cos(240.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(240.0f * 3.14159f / 180.0f)));
-                        if (abs(int(map[robot_w.return_i() - 1].x - s.getPosition().x)) <= horiz_shift && abs(int(map[robot_w.return_i() - 1].y - s.getPosition().y) <= vert_shift))
-                            robot_w.change(robot_w.return_i() - 1);
-                        else robot_w.change(robot_w.return_i() - 18);
-                        if (map[robot_w.return_i()].status == 'w')
-                        {
-                            s.setPosition(p);
-                            robot_w.change(prev_i);
-                           
-                        }
-                        std::cout << robot_w.return_i() << '\n';
-
-                    }
+                    robot_w.move_W(left_border, right_border, upper_border, down_border, s,robot_w);
+                    std::cout << robot_w.return_i() << '\n';                   
                 }
                 else if (event.key.code == sf::Keyboard::E)
                 {
-                    if (robot_w.check_border_collision_E(left_border, right_border, upper_border, down_border, s))
-                    {
-                        p = s.getPosition();
-                        prev_i = robot_w.return_i();
-                        s.move((sqrt(3) * side * cos(300.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(300.0f * 3.14159f / 180.0f)));
-                        if (abs(int(map[robot_w.return_i() - 1].x - s.getPosition().x)) <= horiz_shift && abs(int(map[robot_w.return_i() - 1].y - s.getPosition().y) <= vert_shift))
-                            robot_w.change(robot_w.return_i() - 1 );
-                        else robot_w.change(robot_w.return_i() + 16);
-                        if (map[robot_w.return_i()].status == 'w')
-                        {
-                            s.setPosition(p);
-                            robot_w.change(prev_i);
-                            
-                        }
-                        std::cout << robot_w.return_i() << '\n';
-                    }
+                    robot_w.move_E(left_border, right_border, upper_border, down_border, s,robot_w);
+                        std::cout << robot_w.return_i() << '\n';                    
                 }
                 else if (event.key.code == sf::Keyboard::D)
                 {
-                    if (robot_w.check_border_collision_D(left_border, right_border, upper_border, down_border, s))
-                    {
-                        p = s.getPosition();
-                        prev_i = robot_w.return_i();
-                        s.move((sqrt(3) * side * cos(0.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(0.0f * 3.14159f / 180.0f)));
-                        robot_w.change(robot_w.return_i() + 17);
-                        if (map[robot_w.return_i()].status == 'w')
-                        {
-                            s.setPosition(p);
-                            robot_w.change(prev_i);
-                         
-                        }
+                    robot_w.move_D(left_border, right_border, upper_border, down_border, s,robot_w);
+                  
                         std::cout << robot_w.return_i() << '\n';
 
-                    }
+                
                 }
             }
         }
-        if (is_move) s.setPosition(pos.x - dx, pos.y - dy);
+        
         window.clear();
         build_map(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY, window);
         Townhall townhall_nature(25, 'n', side);
@@ -665,9 +714,9 @@ int main()
         Hut barracks_robot(210, 'r', side);
         balance_g = townhall_robot.return_balance_gold();
         barracks_robot.buy(window, balance_g, clock);
-        
+        instructions(window);
         window.draw(s);
-     
+
         window.display();
 
     }
