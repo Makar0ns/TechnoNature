@@ -324,7 +324,7 @@ private:
     sf::Texture grey;
     int prev_i;
     sf::Vector2f p;
-    bool check=true;
+    bool check = true;
 
 public:
     Entity(char in_team, int in_i, int unit_tier_in, int hp_in)
@@ -336,9 +336,13 @@ public:
     }
     void spawn()
     {
-        if (unit_tier == 0)
+        if (unit_tier == 0 && team=='r')
         {
             texture.loadFromFile("images/robot_worker.png");
+        }
+        else if(unit_tier==0 && team=='n')
+        { 
+             texture.loadFromFile("images/worker_nature.png");
         }
         unit.setTexture(texture);
         unit.setScale(0.19, 0.19);
@@ -356,13 +360,13 @@ public:
     {
         i = in_i;
     }
-    void move_Z(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit,Entity& entiy)
+    void move_Z(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entiy)
     {
         check = true;
         sf::Vector2f position = unit.getPosition();
         float distance = side * sqrt(3) - 3;
         if (position.x - distance<left_border || position.y + distance >down_border) check = false;
-        if(check)
+        if (check)
         {
             p = unit.getPosition();
             prev_i = entiy.return_i();
@@ -398,8 +402,8 @@ public:
                 unit.setPosition(p);
                 entity.change(prev_i);
             }
-         }
-        
+        }
+
     }
     void move_D(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entity)
     {
@@ -486,10 +490,9 @@ public:
                 entiy.change(prev_i);
 
             }
-       }
+        }
     }
 };
-
 void instructions(sf::RenderWindow& window)
 {
     sf::Text text1;
@@ -538,7 +541,6 @@ void instructions(sf::RenderWindow& window)
     window.draw(text6);
 
 }
-
 class Townhall
 {
 private:
@@ -627,12 +629,13 @@ int main()
     create_map(numberOfHexagons_horizontal, numberOfHexagons_vertical, map);
     create_map_coords(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY);
     sf::Sprite s;
-    Entity robot_w('n', 9, 0, 60);
-    Entity tobot('n', 11, 0, 60);
-    tobot.spawn();
+    sf::Sprite S1;
+    Entity robot_w('r', 9, 0, 60);
+    Entity nature_w('n', 27, 0, 60);
+    nature_w.spawn();
     robot_w.spawn();
     s = robot_w.return_drawing();
-
+    S1 = nature_w.return_drawing();
     sf::Vector2f p;
     int prev_i;
     while (window.isOpen())
@@ -669,39 +672,39 @@ int main()
                 if (event.key.code == sf::Keyboard::Z)
                 {
                     robot_w.move_Z(left_border, right_border, upper_border, down_border, s, robot_w);
-                        std::cout << robot_w.return_i() <<'\n';
+                    std::cout << robot_w.return_i() << '\n';
                 }
                 else if (event.key.code == sf::Keyboard::X)
                 {
-                    robot_w.move_X(left_border, right_border, upper_border, down_border, s,robot_w);                                    
-                       std::cout << robot_w.return_i() << '\n';                 
+                    robot_w.move_X(left_border, right_border, upper_border, down_border, s, robot_w);
+                    std::cout << robot_w.return_i() << '\n';
                 }
                 else if (event.key.code == sf::Keyboard::A)
                 {
-                    robot_w.move_A(left_border, right_border, upper_border, down_border, s,robot_w);                                           
-                       std::cout << robot_w.return_i() << '\n';                    
+                    robot_w.move_A(left_border, right_border, upper_border, down_border, s, robot_w);
+                    std::cout << robot_w.return_i() << '\n';
                 }
                 else if (event.key.code == sf::Keyboard::W)
                 {
-                    robot_w.move_W(left_border, right_border, upper_border, down_border, s,robot_w);
-                    std::cout << robot_w.return_i() << '\n';                   
+                    robot_w.move_W(left_border, right_border, upper_border, down_border, s, robot_w);
+                    std::cout << robot_w.return_i() << '\n';
                 }
                 else if (event.key.code == sf::Keyboard::E)
                 {
-                    robot_w.move_E(left_border, right_border, upper_border, down_border, s,robot_w);
-                        std::cout << robot_w.return_i() << '\n';                    
+                    robot_w.move_E(left_border, right_border, upper_border, down_border, s, robot_w);
+                    std::cout << robot_w.return_i() << '\n';
                 }
                 else if (event.key.code == sf::Keyboard::D)
                 {
-                    robot_w.move_D(left_border, right_border, upper_border, down_border, s,robot_w);
-                  
-                        std::cout << robot_w.return_i() << '\n';
+                    robot_w.move_D(left_border, right_border, upper_border, down_border, s, robot_w);
 
-                
+                    std::cout << robot_w.return_i() << '\n';
+
+
                 }
             }
         }
-        
+
         window.clear();
         build_map(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY, window);
         Townhall townhall_nature(25, 'n', side);
@@ -716,7 +719,7 @@ int main()
         barracks_robot.buy(window, balance_g, clock);
         instructions(window);
         window.draw(s);
-
+        window.draw(S1);
         window.display();
 
     }
