@@ -325,7 +325,7 @@ private:
     int prev_i;
     sf::Vector2f p;
     bool check = true;
-
+    int turns_left = 1;
 public:
     Entity(char in_team, int in_i, int unit_tier_in, int hp_in)
     {
@@ -339,28 +339,19 @@ public:
         if (unit_tier == 0 && team == 'r')
         {
             texture.loadFromFile("images/robot_worker.png");
-            unit.setPosition(1670.f, 90.f);
         }
         else if (unit_tier == 0 && team == 'n')
         {
             texture.loadFromFile("images/worker_nature.png");
-            unit.setPosition(1550.f, 90.f);
         }
         else if (unit_tier == 1 && team == 'n')
         {
             texture.loadFromFile("images/warrior_nature1.png");
-            unit.setPosition(1550.f, 200.f);
-        }
-        else if (unit_tier == 1 && team == 'r')
-        {
-            texture.loadFromFile("images/robot_warrior.png");
-            unit.setPosition(1670.f, 200.f);
         }
         unit.setTexture(texture);
         unit.setScale(0.19, 0.19);
-        
+        unit.setPosition(map[i].x + hor_space, map[i].y + ver_space);
     }
-   
     sf::Sprite& return_drawing()
     {
         return unit;
@@ -372,6 +363,22 @@ public:
     void change(int in_i)
     {
         i = in_i;
+    }
+    char return_team()
+    {
+        return team;
+    }
+    int return_turns()
+    {
+        return turns_left;
+    }
+    void decrease_turns()
+    {
+        turns_left--;
+    }
+    void turns_set_to()
+    {
+        turns_left = 1;
     }
     void move_Z(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
@@ -395,6 +402,7 @@ public:
 
             }
         }
+
     }
     void move_X(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
@@ -416,7 +424,6 @@ public:
                 entity.change(prev_i);
             }
         }
-
     }
     void move_D(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
@@ -506,8 +513,14 @@ public:
         }
     }
 };
-void instructions(sf::RenderWindow& window)
+void instructions(sf::RenderWindow& window, sf::Sprite& button)
 {
+    sf::Texture button_texture;
+    button_texture.loadFromFile("images/end_turn.png");
+    button.setTexture(button_texture);
+    button.setScale(0.4, 0.4);
+    button.setPosition(1430, 700);
+    window.draw(button);
     sf::Text text1;
     sf::Text text2;
     sf::Text text3;
@@ -515,7 +528,7 @@ void instructions(sf::RenderWindow& window)
     sf::Text text5;
     sf::Text text6;
     sf::Font font;
-    sf::RectangleShape menu(sf::Vector2f(400,600));
+    sf::RectangleShape menu(sf::Vector2f(400, 600));
     menu.setFillColor(sf::Color::Black);
     menu.setPosition(1440, 73);
     menu.setOutlineThickness(10.f);
@@ -558,9 +571,6 @@ void instructions(sf::RenderWindow& window)
     text6.move(1600, 850);
     window.draw(text6);
     window.draw(menu);
-
-
-
 }
 class Townhall
 {
@@ -634,8 +644,12 @@ public:
 };
 int main()
 {
+    int turns_left;
+    char selected_team;
+    int turn_cnt = 0;
     sf::Clock clock;
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
+    sf::Sprite button;
     bool is_move = false;
     bool spawned = true;
     float dx = 0, dy = 0;
@@ -651,17 +665,13 @@ int main()
     create_map_coords(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY);
     sf::Sprite unit;
     std::vector <Entity> entities;
-    entities.push_back(Entity('r', 262, 0, 60));
-    entities.push_back(Entity('n', 7, 0, 60));
-    entities.push_back(Entity('n', 9, 1, 60));
-    entities.push_back(Entity('r', 264, 1, 60));
-
-    
+    entities.push_back(Entity('r', 263, 0, 60));
+    entities.push_back(Entity('n', 25, 0, 60));
+    entities.push_back(Entity('n', 40, 1, 60));
 
     entities[0].spawn();
     entities[1].spawn();
     entities[2].spawn();
-    entities[3].spawn();
 
     sf::Vector2f p;
     int prev_i = 0;
@@ -676,63 +686,80 @@ int main()
 
             if (event.type == sf::Event::Closed)
                 window.close();
-            if (event.type == sf::Event::MouseButtonPressed)
-                if (event.mouseButton.button == sf::Mouse::Left) {
 
+            if (event.type == sf::Event::MouseButtonPressed)
+                if (event.mouseButton.button == sf::Mouse::Left)
+                {
                     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-                    std::cout << mousePosition.x << ' ' << mousePosition.y;
-                    for (int i = 0; i < entities.size(); ++i) 
+                    for (int i = 0; i < entities.size(); ++i)
                     {
+                       
                         if (entities[i].return_drawing().getGlobalBounds().contains(mousePosition.x, mousePosition.y))
                         {
-                            if (entities[i].return_drawing().getGlobalBounds().left > 1400)
-                                entities[i].return_drawing().setPosition(map[entities[i].return_i()].x+10, map[entities[i].return_i()].y+10);
-                            else
-                            {
-                                prev_i = selectedEntityIndex;
-                                selectedEntityIndex = i;
-                                break;
-                            }
+                            prev_i = selectedEntityIndex;
+                            selectedEntityIndex = i;
+                            break;
                         }
-                        
                     }
+                    if (turn_cnt % 2 == 0)
+                        selected_team = 'n';
+                    else selected_team = 'r';
+                    
+                    if (button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
+                    {
+                        turn_cnt++;
+                        for (int i = 0; i < entities.size(); i++)
+                        {
+                             entities[i].turns_set_to();
+                        }
+                    }
+                   
                 }
-            
-            
+            entities[prev_i].spawn();
+
+
             if (selectedEntityIndex != -1)
             {
+
                 if (event.type == sf::Event::KeyPressed)
                 {
-                    if (event.key.code == sf::Keyboard::Z)
+
+                    if (event.key.code == sf::Keyboard::Z && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
                     {
+                        entities[selectedEntityIndex].decrease_turns();
                         entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                        std::cout << entities[selectedEntityIndex].return_i() << '\n';
+                        std::cout << turns_left << '\n';
                     }
-                    else if (event.key.code == sf::Keyboard::X)
+                    else if (event.key.code == sf::Keyboard::X && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
                     {
+                        entities[selectedEntityIndex].decrease_turns();
                         entities[selectedEntityIndex].move_X(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                       std::cout << entities[selectedEntityIndex].return_i() << '\n';
+
                     }
-                    else if (event.key.code == sf::Keyboard::A)
+                    else if (event.key.code == sf::Keyboard::A && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
                     {
+                        entities[selectedEntityIndex].decrease_turns();
                         entities[selectedEntityIndex].move_A(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                       std::cout << entities[selectedEntityIndex].return_i() << '\n';
+
                     }
-                    else if (event.key.code == sf::Keyboard::W)
+                    else if (event.key.code == sf::Keyboard::W && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
                     {
+                        entities[selectedEntityIndex].decrease_turns();
                         entities[selectedEntityIndex].move_W(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                       std::cout << entities[selectedEntityIndex].return_i() << '\n';
+
                     }
-                    else if (event.key.code == sf::Keyboard::E)
+                    else if (event.key.code == sf::Keyboard::E && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
                     {
+                        entities[selectedEntityIndex].decrease_turns();
                         entities[selectedEntityIndex].move_E(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                       std::cout << entities[selectedEntityIndex].return_i() << '\n';
+
                     }
-                    else if (event.key.code == sf::Keyboard::D)
+                    else if (event.key.code == sf::Keyboard::D && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
                     {
+                        entities[selectedEntityIndex].decrease_turns();
                         entities[selectedEntityIndex].move_D(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
 
-                      std::cout << entities[selectedEntityIndex].return_i() << '\n';
+
                     }
                 }
             }
@@ -752,7 +779,7 @@ int main()
         Hut barracks_robot(210, 'r', side);
         balance_g = townhall_robot.return_balance_gold();
         barracks_robot.buy(window, balance_g, clock);
-        instructions(window);
+        instructions(window, button);
         for (int i = 0; i < entities.size(); i++)
         {
             window.draw(entities[i].return_drawing());
