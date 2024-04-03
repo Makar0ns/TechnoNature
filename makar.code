@@ -339,17 +339,28 @@ public:
         if (unit_tier == 0 && team == 'r')
         {
             texture.loadFromFile("images/robot_worker.png");
+            unit.setPosition(map[i].x + hor_space, map[i].y + ver_space);
         }
         else if (unit_tier == 0 && team == 'n')
         {
             texture.loadFromFile("images/worker_nature.png");
+            unit.setPosition(map[i].x + hor_space, map[i].y + ver_space);
         }
         else if (unit_tier == 1 && team == 'n')
         {
             texture.loadFromFile("images/warrior_nature1.png");
+            unit.setPosition(1550.f, 100.f);
+        }
+        else if (unit_tier == 1 && team == 'r')
+        {
+            texture.loadFromFile("images/robot_warrior.png");
+            unit.setPosition(1670.f, 60.f);
         }
         unit.setTexture(texture);
         unit.setScale(0.19, 0.19);
+    }
+    void on_map()
+    {
         unit.setPosition(map[i].x + hor_space, map[i].y + ver_space);
     }
     sf::Sprite& return_drawing()
@@ -668,10 +679,11 @@ int main()
     entities.push_back(Entity('r', 263, 0, 60));
     entities.push_back(Entity('n', 25, 0, 60));
     entities.push_back(Entity('n', 40, 1, 60));
-
     entities[0].spawn();
     entities[1].spawn();
     entities[2].spawn();
+    
+    
 
     sf::Vector2f p;
     int prev_i = 0;
@@ -696,9 +708,17 @@ int main()
                        
                         if (entities[i].return_drawing().getGlobalBounds().contains(mousePosition.x, mousePosition.y))
                         {
-                            prev_i = selectedEntityIndex;
-                            selectedEntityIndex = i;
-                            break;
+                            if (entities[i].return_drawing().getGlobalBounds().left > 1400)
+                            {
+                                entities[i].on_map();
+                            }
+
+                            else
+                            {
+                                prev_i = selectedEntityIndex;
+                                selectedEntityIndex = i;
+                                break;
+                            }
                         }
                     }
                     if (turn_cnt % 2 == 0)
@@ -715,7 +735,7 @@ int main()
                     }
                    
                 }
-            entities[prev_i].spawn();
+            entities[prev_i].on_map();
 
 
             if (selectedEntityIndex != -1)
