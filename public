@@ -325,7 +325,7 @@ private:
     int prev_i;
     sf::Vector2f p;
     bool check = true;
-
+    int turns_left=1;
 public:
     Entity(char in_team, int in_i, int unit_tier_in, int hp_in)
     {
@@ -336,19 +336,23 @@ public:
     }
     void spawn()
     {
-        if (unit_tier == 0 && team=='r')
+        if (unit_tier == 0 && team == 'r')
         {
             texture.loadFromFile("images/robot_worker.png");
         }
-        else if(unit_tier==0 && team=='n')
-        { 
-             texture.loadFromFile("images/worker_nature.png");
+        else if (unit_tier == 0 && team == 'n')
+        {
+            texture.loadFromFile("images/worker_nature.png");
+        }
+        else if (unit_tier == 1 && team == 'n')
+        {
+            texture.loadFromFile("images/warrior_nature1.png");
         }
         unit.setTexture(texture);
         unit.setScale(0.19, 0.19);
         unit.setPosition(map[i].x + hor_space, map[i].y + ver_space);
     }
-    sf::Sprite return_drawing()
+    sf::Sprite& return_drawing()
     {
         return unit;
     }
@@ -360,141 +364,163 @@ public:
     {
         i = in_i;
     }
-    void move_Z(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entiy)
+    char return_team()
+    {
+        return team;
+    }
+    int return_turns()
+    {
+        return turns_left;
+    }
+    void decrease_turns()
+    {
+        turns_left--;
+    }
+    void turns_set_to()
+    {
+        turns_left = 1;
+    }
+    void move_Z(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
         check = true;
-        sf::Vector2f position = unit.getPosition();
+        sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) - 3;
         if (position.x - distance<left_border || position.y + distance >down_border) check = false;
         if (check)
         {
-            p = unit.getPosition();
-            prev_i = entiy.return_i();
-            unit.move((sqrt(3) * side * cos(120.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(120.0f * 3.14159f / 180.0f)));
-            if (abs(int(unit.getPosition().x - map[entiy.return_i() + 1].x)) <= horiz_shift && abs(int(unit.getPosition().y - map[entiy.return_i() + 1].y)) <= vert_shift)
-                entiy.change(entiy.return_i() + 1);
-            else entiy.change(entiy.return_i() - 16);
+            p = entity.return_drawing().getPosition();
+            prev_i = entity.return_i();
+            entity.return_drawing().move((sqrt(3) * side * cos(120.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(120.0f * 3.14159f / 180.0f)));
+            if (abs(int(entity.return_drawing().getPosition().x - map[entity.return_i() + 1].x)) <= horiz_shift && abs(int(entity.return_drawing().getPosition().y - map[entity.return_i() + 1].y)) <= vert_shift)
+                entity.change(entity.return_i() + 1);
+            else entity.change(entity.return_i() - 16);
 
-            if (map[entiy.return_i()].status == 'w')
+            if (map[entity.return_i()].status == 'w')
             {
-                unit.setPosition(p);
-                entiy.change(prev_i);
+                entity.return_drawing().setPosition(p);
+                entity.change(prev_i);
 
             }
         }
+        
     }
-    void move_X(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entity)
+    void move_X(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
         check = true;
-        sf::Vector2f position = unit.getPosition();
+        sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) - 3;
         if (position.x + distance > right_border || position.y + distance > down_border) check = false;
         if (check)
         {
-            p = unit.getPosition();
+            p = entity.return_drawing().getPosition();
             prev_i = entity.return_i();
-            unit.move((sqrt(3) * side * cos(60.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(60.0f * 3.14159f / 180.0f)));
-            if (abs(int(map[entity.return_i() + 1].x - unit.getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() + 1].y - unit.getPosition().y) <= vert_shift))
+            entity.return_drawing().move((sqrt(3) * side * cos(60.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(60.0f * 3.14159f / 180.0f)));
+            if (abs(int(map[entity.return_i() + 1].x - entity.return_drawing().getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() + 1].y - entity.return_drawing().getPosition().y) <= vert_shift))
                 entity.change(entity.return_i() + 1);
             else entity.change(entity.return_i() + 18);
             if (map[entity.return_i()].status == 'w')
             {
-                unit.setPosition(p);
+                entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
             }
         }
-
     }
-    void move_D(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entity)
+    void move_D(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
         check = true;
-        sf::Vector2f position = unit.getPosition();
+        sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) + 5;
         if (position.x + distance > right_border)
             check = false;
         if (check)
         {
-            p = unit.getPosition();
+            p = entity.return_drawing().getPosition();
             prev_i = entity.return_i();
-            unit.move((sqrt(3) * side * cos(0.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(0.0f * 3.14159f / 180.0f)));
+            entity.return_drawing().move((sqrt(3) * side * cos(0.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(0.0f * 3.14159f / 180.0f)));
             entity.change(entity.return_i() + 17);
             if (map[entity.return_i()].status == 'w')
             {
-                unit.setPosition(p);
+                entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
             }
         }
     }
-    void move_E(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entity)
+    void move_E(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
         check = true;
-        sf::Vector2f position = unit.getPosition();
+        sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3), vert_distance = side * sqrt(3) * 2;
         if (position.x + distance > right_border || position.y - vert_distance < upper_border)
             check = false;
         if (check)
         {
-            p = unit.getPosition();
+            p = entity.return_drawing().getPosition();
             prev_i = entity.return_i();
-            unit.move((sqrt(3) * side * cos(300.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(300.0f * 3.14159f / 180.0f)));
-            if (abs(int(map[entity.return_i() - 1].x - unit.getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() - 1].y - unit.getPosition().y) <= vert_shift))
+            entity.return_drawing().move((sqrt(3) * side * cos(300.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(300.0f * 3.14159f / 180.0f)));
+            if (abs(int(map[entity.return_i() - 1].x - entity.return_drawing().getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() - 1].y - entity.return_drawing().getPosition().y) <= vert_shift))
                 entity.change(entity.return_i() - 1);
             else entity.change(entity.return_i() + 16);
             if (map[entity.return_i()].status == 'w')
             {
-                unit.setPosition(p);
+                entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
 
             }
         }
     }
-    void move_W(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entity)
+    void move_W(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
         check = true;
-        sf::Vector2f position = unit.getPosition();
+        sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3), vert_distance = side * sqrt(3) * 2;
         if (position.x - distance < left_border || position.y - vert_distance < upper_border)
             check = false;
         if (check)
         {
-            p = unit.getPosition();
+            p = entity.return_drawing().getPosition();
             prev_i = entity.return_i();
-            unit.move((sqrt(3) * side * cos(240.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(240.0f * 3.14159f / 180.0f)));
-            if (abs(int(map[entity.return_i() - 1].x - unit.getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() - 1].y - unit.getPosition().y) <= vert_shift))
+            entity.return_drawing().move((sqrt(3) * side * cos(240.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(240.0f * 3.14159f / 180.0f)));
+            if (abs(int(map[entity.return_i() - 1].x - entity.return_drawing().getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() - 1].y - entity.return_drawing().getPosition().y) <= vert_shift))
                 entity.change(entity.return_i() - 1);
             else entity.change(entity.return_i() - 18);
             if (map[entity.return_i()].status == 'w')
             {
-                unit.setPosition(p);
+                entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
 
             }
         }
     }
-    void move_A(float left_border, float right_border, float upper_border, float down_border, sf::Sprite& unit, Entity& entiy)
+    void move_A(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
         check = true;
-        sf::Vector2f position = unit.getPosition();
+        sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) * 1.5;
         if (position.x - distance < left_border)
             check = false;
         if (check)
         {
-            p = unit.getPosition();
-            prev_i = entiy.return_i();
-            unit.move((sqrt(3) * side * cos(180.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(180.0f * 3.14159f / 180.0f)));
-            entiy.change(entiy.return_i() - 17);
-            if (map[entiy.return_i()].status == 'w')
+            p = entity.return_drawing().getPosition();
+            prev_i = entity.return_i();
+            entity.return_drawing().move((sqrt(3) * side * cos(180.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(180.0f * 3.14159f / 180.0f)));
+            entity.change(entity.return_i() - 17);
+            if (map[entity.return_i()].status == 'w')
             {
-                unit.setPosition(p);
-                entiy.change(prev_i);
+                entity.return_drawing().setPosition(p);
+                entity.change(prev_i);
 
             }
         }
     }
 };
-void instructions(sf::RenderWindow& window)
+void instructions(sf::RenderWindow& window, sf::Sprite& button)
 {
+    sf::Texture button_texture;
+    button_texture.loadFromFile("images/endturn.png");
+    button.setTexture(button_texture);
+    button.setScale(0.4, 0.4);
+    button.setPosition(1430, 700);
+    window.draw(button);
     sf::Text text1;
     sf::Text text2;
     sf::Text text3;
@@ -502,6 +528,11 @@ void instructions(sf::RenderWindow& window)
     sf::Text text5;
     sf::Text text6;
     sf::Font font;
+    sf::RectangleShape menu(sf::Vector2f(400, 600));
+    menu.setFillColor(sf::Color::Black);
+    menu.setPosition(1440, 73);
+    menu.setOutlineThickness(10.f);
+    menu.setOutlineColor(sf::Color(216, 178, 129));
     font.loadFromFile("Fonts/file.ttf");
     text1.setFont(font);
     text1.setCharacterSize(18);
@@ -539,7 +570,7 @@ void instructions(sf::RenderWindow& window)
     text6.setFillColor(sf::Color::White);
     text6.move(1600, 850);
     window.draw(text6);
-
+    window.draw(menu);
 }
 class Townhall
 {
@@ -549,7 +580,7 @@ private:
     bool is_destroyed = false;
     int hp = 10;
     int i = 0;
-    int income_aurum = 1;
+    int income_gold = 1;
     int income_etherium = 0;
     int income_pandorium = 0;
     int balance_gold = 4;
@@ -585,9 +616,9 @@ public:
     {
         return is_destroyed;
     }
-    void change_income_aurum(int cnt_workers, int cnt_mineschaft_aurum)
+    void change_income_gold(int cnt_workers, int cnt_mineschaft_gold)
     {
-        income_aurum = cnt_workers + cnt_mineschaft_aurum * 4;
+        income_gold = cnt_workers + cnt_mineschaft_gold * 4;
     }
     void change_income_etherium(int mineschaft_etherium)
     {
@@ -609,12 +640,29 @@ public:
     {
         return balance_pandorium;
     }
+    void update_gold()
+    {
+        balance_gold +=income_gold;
+    }
+    void update_etherium()
+    {
+        balance_etherium +=income_etherium;
+    }
+    void update_pandorium()
+    {
+        balance_pandorium += income_pandorium;
+    }
+
 
 };
 int main()
 {
+    int turns_left;
+    char selected_team = 'n';
+    int turn_cnt = 0;
     sf::Clock clock;
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
+    sf::Sprite button;
     bool is_move = false;
     bool spawned = true;
     float dx = 0, dy = 0;
@@ -628,16 +676,73 @@ int main()
     float right_border = startX + side * (numberOfHexagons_horizontal - 3) * 2, down_border = startY + side * (numberOfHexagons_vertical + 1) * 1.5;
     create_map(numberOfHexagons_horizontal, numberOfHexagons_vertical, map);
     create_map_coords(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY);
-    sf::Sprite s;
-    sf::Sprite S1;
-    Entity robot_w('r', 9, 0, 60);
-    Entity nature_w('n', 27, 0, 60);
-    nature_w.spawn();
-    robot_w.spawn();
-    s = robot_w.return_drawing();
-    S1 = nature_w.return_drawing();
+    sf::Sprite unit;
+    std::vector <Entity> entities;
+    entities.push_back(Entity('r', 263, 0, 60));
+    entities.push_back(Entity('n', 25, 0, 60));
+    entities.push_back(Entity('n', 40, 1, 60));
+    for (int i = 0; i < entities.size(); i++)
+    {
+        entities[i].spawn();
+    }
+    sf::RectangleShape hider_n_g(sf::Vector2f(50, 50));
+    hider_n_g.setFillColor(sf::Color::Black);
+    hider_n_g.setPosition(50, 600);
+    sf::RectangleShape hider_r_g(sf::Vector2f(50, 50));
+    hider_r_g.setFillColor(sf::Color::Black);
+    hider_r_g.setPosition(50, 650);
+    sf::RectangleShape hider_n_e(sf::Vector2f(50, 50));
+    hider_n_e.setFillColor(sf::Color::Black);
+    hider_n_e.setPosition(100, 600);
+    sf::RectangleShape hider_r_e(sf::Vector2f(50, 50));
+    hider_r_e.setFillColor(sf::Color::Black);
+    hider_r_e.setPosition(100, 650);
+    sf::RectangleShape hider_n_p(sf::Vector2f(50, 50));
+    hider_n_p.setFillColor(sf::Color::Black);
+    hider_n_p.setPosition(150, 600);
+    sf::RectangleShape hider_r_p(sf::Vector2f(50, 50));
+    hider_r_p.setFillColor(sf::Color::Black);
+    hider_r_p.setPosition(150, 650);
+    Townhall townhall_nature(25, 'n', side);
+    Townhall townhall_robot(263, 'r', side);
+    sf::Font balance;
+    sf::Text balance_gold_text_n;
+    sf::Text balance_gold_text_r;
+    sf::Text balance_etherium_text_n;
+    sf::Text balance_etherium_text_r;
+    sf::Text balance_pandorium_text_n;
+    sf::Text balance_pandorium_text_r;
+    balance.loadFromFile("Fonts/file.ttf");
+    balance_gold_text_n.setFont(balance);
+    balance_gold_text_r.setFont(balance);
+    balance_gold_text_n.setCharacterSize(20);
+    balance_gold_text_r.setCharacterSize(20);
+    balance_gold_text_n.setFillColor(sf::Color::Yellow);
+    balance_gold_text_r.setFillColor(sf::Color::Yellow);
+    balance_gold_text_n.move(50, 600);
+    balance_gold_text_r.move(50, 650);
+    
+    balance_etherium_text_n.setFont(balance);
+    balance_etherium_text_n.setCharacterSize(20);
+    balance_etherium_text_n.setFillColor(sf::Color::Red);
+    balance_etherium_text_n.move(100, 600);
+    balance_etherium_text_r.setFont(balance);
+    balance_etherium_text_r.setCharacterSize(20);
+    balance_etherium_text_r.setFillColor(sf::Color::Red);
+    balance_etherium_text_r.move(100, 650);
+    
+    balance_pandorium_text_n.setFont(balance);
+    balance_pandorium_text_n.setCharacterSize(20);
+    balance_pandorium_text_n.setFillColor(sf::Color(198,115,255));
+    balance_pandorium_text_n.move(150, 600);
+    balance_pandorium_text_r.setFont(balance);
+    balance_pandorium_text_r.setCharacterSize(20);
+    balance_pandorium_text_r.setFillColor(sf::Color(198, 115, 255));
+    balance_pandorium_text_r.move(150, 650);
+    
     sf::Vector2f p;
-    int prev_i;
+    int prev_i = 0;
+    int selectedEntityIndex = 0;
     while (window.isOpen())
     {
         sf::Vector2i pos = sf::Mouse::getPosition(window);
@@ -649,77 +754,134 @@ int main()
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            //if (event.type == sf::Event::MouseButtonPressed)
-           // {
-                //if (event.key.code == sf::Mouse::Left)
-               // {
-                    //if (s.getGlobalBounds().contains(pos.x, pos.y))
-                    //{
+            if (event.type == sf::Event::MouseButtonPressed)
+                if (event.mouseButton.button == sf::Mouse::Left)
+                {
+                    sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                    for (int i = 0; i < entities.size(); ++i)
+                    {
 
-                   // }
-               // }
+                        if (entities[i].return_drawing().getGlobalBounds().contains(mousePosition.x, mousePosition.y))
+                        {
+                            prev_i = selectedEntityIndex;
+                            selectedEntityIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    if (turn_cnt % 2 == 0)
+                        selected_team = 'n';
+                    else selected_team = 'r';
+                    if (button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
+                    {
+                        turn_cnt++;
+                        if (selected_team == 'n')
+                        {
+                            townhall_nature.update_gold();
+                            townhall_nature.update_etherium();
+                            townhall_nature.update_pandorium();
+                            balance_gold_text_n.setString(std::to_string(townhall_nature.return_balance_gold()));
+                            balance_etherium_text_n.setString(std::to_string(townhall_nature.return_balance_etherium()));
+                            balance_pandorium_text_n.setString(std::to_string(townhall_nature.return_balance_pandorium()));
+                        }
+                        else
+                        {
+                            townhall_robot.update_gold();
+                            townhall_robot.update_etherium();
+                            townhall_robot.update_pandorium();
+                            balance_gold_text_r.setString(std::to_string(townhall_robot.return_balance_gold()));
+                            balance_etherium_text_r.setString(std::to_string(townhall_robot.return_balance_etherium()));
+                            balance_pandorium_text_r.setString(std::to_string(townhall_robot.return_balance_pandorium()));
+                        }
+                        for (int i = 0; i < entities.size(); i++)
+                        {
+                            entities[i].turns_set_to();
+                        }
+                    }
+                    
 
-           // }
-            if (event.type == sf::Event::MouseButtonReleased)
+                }
+            entities[prev_i].spawn();
+
+
+            if (selectedEntityIndex != -1)
             {
-                if (event.key.code == sf::Mouse::Left)
-                {
-                    is_move = false;
-                }
-            }
-            if (event.type == sf::Event::KeyPressed)
-            {
-                if (event.key.code == sf::Keyboard::Z)
-                {
-                    robot_w.move_Z(left_border, right_border, upper_border, down_border, s, robot_w);
-                    std::cout << robot_w.return_i() << '\n';
-                }
-                else if (event.key.code == sf::Keyboard::X)
-                {
-                    robot_w.move_X(left_border, right_border, upper_border, down_border, s, robot_w);
-                    std::cout << robot_w.return_i() << '\n';
-                }
-                else if (event.key.code == sf::Keyboard::A)
-                {
-                    robot_w.move_A(left_border, right_border, upper_border, down_border, s, robot_w);
-                    std::cout << robot_w.return_i() << '\n';
-                }
-                else if (event.key.code == sf::Keyboard::W)
-                {
-                    robot_w.move_W(left_border, right_border, upper_border, down_border, s, robot_w);
-                    std::cout << robot_w.return_i() << '\n';
-                }
-                else if (event.key.code == sf::Keyboard::E)
-                {
-                    robot_w.move_E(left_border, right_border, upper_border, down_border, s, robot_w);
-                    std::cout << robot_w.return_i() << '\n';
-                }
-                else if (event.key.code == sf::Keyboard::D)
-                {
-                    robot_w.move_D(left_border, right_border, upper_border, down_border, s, robot_w);
 
-                    std::cout << robot_w.return_i() << '\n';
+                if (event.type == sf::Event::KeyPressed)
+                {
+
+                    if (event.key.code == sf::Keyboard::Z && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    {
+                        entities[selectedEntityIndex].decrease_turns();
+                        entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                        std::cout << turns_left << '\n';
+                    }
+                    else if (event.key.code == sf::Keyboard::X && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    {
+                        entities[selectedEntityIndex].decrease_turns();
+                        entities[selectedEntityIndex].move_X(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+
+                    }
+                    else if (event.key.code == sf::Keyboard::A && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    {
+                        entities[selectedEntityIndex].decrease_turns();
+                        entities[selectedEntityIndex].move_A(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+
+                    }
+                    else if (event.key.code == sf::Keyboard::W && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    {
+                        entities[selectedEntityIndex].decrease_turns();
+                        entities[selectedEntityIndex].move_W(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+
+                    }
+                    else if (event.key.code == sf::Keyboard::E && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    {
+                        entities[selectedEntityIndex].decrease_turns();
+                        entities[selectedEntityIndex].move_E(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+
+                    }
+                    else if (event.key.code == sf::Keyboard::D && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    {
+                        entities[selectedEntityIndex].decrease_turns();
+                        entities[selectedEntityIndex].move_D(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
 
 
+                    }
                 }
             }
         }
 
-        window.clear();
+
+
+
+        
         build_map(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY, window);
-        Townhall townhall_nature(25, 'n', side);
         townhall_nature.draw(window);
-        Townhall townhall_robot(263, 'r', side);
         townhall_robot.draw(window);
         Hut barracks_nature(42, 'n', side);
         balance_g = townhall_nature.return_balance_gold();
-        barracks_nature.buy(window, balance_g, clock);
+        //barracks_nature.buy(window, balance_g, clock);
         Hut barracks_robot(210, 'r', side);
         balance_g = townhall_robot.return_balance_gold();
-        barracks_robot.buy(window, balance_g, clock);
-        instructions(window);
-        window.draw(s);
-        window.draw(S1);
+        //barracks_robot.buy(window, balance_g, clock);
+        instructions(window,button);
+        for (int i = 0; i < entities.size(); i++)
+        {
+            window.draw(entities[i].return_drawing());
+        }
+        window.draw(entities[selectedEntityIndex].return_drawing());
+        window.draw(hider_n_g);
+        window.draw(balance_gold_text_n);
+        window.draw(hider_r_g);
+        window.draw(balance_gold_text_r);
+        window.draw(hider_n_e);
+        window.draw(balance_etherium_text_n);
+        window.draw(hider_r_e);
+        window.draw(balance_etherium_text_r);
+        window.draw(hider_n_p);
+        window.draw(balance_pandorium_text_n);
+        window.draw(hider_r_p);
+        window.draw(balance_pandorium_text_r);
         window.display();
 
     }
