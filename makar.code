@@ -183,7 +183,7 @@ void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_v
                 hexagon.setTexture(&nature);
             else if (map[current_i].status == 't')//tower башні
                 hexagon.setTexture(&tower_default);
-            else if (map[current_i].status == 'm')//mechanics 
+            else if (map[current_i].status == 'r')//robot
                 hexagon.setTexture(&robot);
             else if (map[current_i].status == 'a')//aurum
                 hexagon.setTexture(&aurum);
@@ -339,28 +339,17 @@ public:
         if (unit_tier == 0 && team == 'r')
         {
             texture.loadFromFile("images/robot_worker.png");
-            unit.setPosition(map[i].x + hor_space, map[i].y + ver_space);
         }
         else if (unit_tier == 0 && team == 'n')
         {
             texture.loadFromFile("images/worker_nature.png");
-            unit.setPosition(map[i].x + hor_space, map[i].y + ver_space);
         }
         else if (unit_tier == 1 && team == 'n')
         {
             texture.loadFromFile("images/warrior_nature1.png");
-            unit.setPosition(1550.f, 100.f);
-        }
-        else if (unit_tier == 1 && team == 'r')
-        {
-            texture.loadFromFile("images/robot_warrior.png");
-            unit.setPosition(1670.f, 60.f);
         }
         unit.setTexture(texture);
         unit.setScale(0.19, 0.19);
-    }
-    void on_map()
-    {
         unit.setPosition(map[i].x + hor_space, map[i].y + ver_space);
     }
     sf::Sprite& return_drawing()
@@ -390,6 +379,10 @@ public:
     void turns_set_to()
     {
         turns_left = 1;
+    }
+    int return_tier()
+    {
+        return unit_tier;
     }
     void move_Z(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
@@ -591,7 +584,7 @@ private:
     bool is_destroyed = false;
     int hp = 10;
     int i = 0;
-    int income_aurum = 1;
+    int income_gold = 1;
     int income_etherium = 0;
     int income_pandorium = 0;
     int balance_gold = 4;
@@ -627,9 +620,9 @@ public:
     {
         return is_destroyed;
     }
-    void change_income_aurum(int cnt_workers, int cnt_mineschaft_aurum)
+    void change_income_gold(int cnt_workers, int cnt_mineschaft_gold)
     {
-        income_aurum = cnt_workers + cnt_mineschaft_aurum * 4;
+        income_gold = cnt_workers + cnt_mineschaft_gold * 4;
     }
     void change_income_etherium(int mineschaft_etherium)
     {
@@ -651,13 +644,32 @@ public:
     {
         return balance_pandorium;
     }
+    void update_gold()
+    {
+        balance_gold += income_gold;
+    }
+    void update_etherium()
+    {
+        balance_etherium += income_etherium;
+    }
+    void update_pandorium()
+    {
+        balance_pandorium += income_pandorium;
+    }
+
 
 };
 int main()
 {
     int turns_left;
-    char selected_team;
-    int turn_cnt = 0;
+    bool can_move_n = true;
+    bool can_move_r = true;
+    bool capturing_status_nature = false;
+    bool capturing_status_robot = false;
+    int cnt_n = 4;
+    int cnt_r = 4;
+    char selected_team = 'n';
+    int turn_cnt = 1;
     sf::Clock clock;
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
     sf::Sprite button;
@@ -679,11 +691,95 @@ int main()
     entities.push_back(Entity('r', 263, 0, 60));
     entities.push_back(Entity('n', 25, 0, 60));
     entities.push_back(Entity('n', 40, 1, 60));
-    entities[0].spawn();
-    entities[1].spawn();
-    entities[2].spawn();
-    
-    
+    for (int i = 0; i < entities.size(); i++)
+    {
+        entities[i].spawn();
+    }
+    sf::RectangleShape hider_n_g(sf::Vector2f(50, 50));
+    hider_n_g.setFillColor(sf::Color::Black);
+    hider_n_g.setPosition(200, 600);
+    sf::RectangleShape hider_r_g(sf::Vector2f(50, 50));
+    hider_r_g.setFillColor(sf::Color::Black);
+    hider_r_g.setPosition(200, 650);
+    sf::RectangleShape hider_n_e(sf::Vector2f(50, 50));
+    hider_n_e.setFillColor(sf::Color::Black);
+    hider_n_e.setPosition(250, 600);
+    sf::RectangleShape hider_r_e(sf::Vector2f(50, 50));
+    hider_r_e.setFillColor(sf::Color::Black);
+    hider_r_e.setPosition(250, 650);
+    sf::RectangleShape hider_n_p(sf::Vector2f(50, 50));
+    hider_n_p.setFillColor(sf::Color::Black);
+    hider_n_p.setPosition(300, 600);
+    sf::RectangleShape hider_r_p(sf::Vector2f(50, 50));
+    hider_r_p.setFillColor(sf::Color::Black);
+    hider_r_p.setPosition(300, 650);
+    Townhall townhall_nature(25, 'n', side);
+    Townhall townhall_robot(263, 'r', side);
+
+    sf::Sprite gold_stone;
+    sf::Texture gold;
+    gold.loadFromFile("Images\\gold_stone.png");
+    gold_stone.setTexture(gold);
+    gold_stone.setScale(0.3, 0.3);
+    gold_stone.setPosition(180, 520);
+
+    sf::Sprite etherium_stone;
+    sf::Texture etherium;
+    etherium.loadFromFile("Images\\etherium_stone.png");
+    etherium_stone.setTexture(etherium);
+    etherium_stone.setScale(0.2, 0.2);
+    etherium_stone.setPosition(230, 520);
+
+    sf::Sprite pandorium_stone;
+    sf::Texture pandorium;
+    pandorium.loadFromFile("Images\\pandorium_stone.png");
+    pandorium_stone.setTexture(pandorium);
+    pandorium_stone.setScale(0.2, 0.2);
+    pandorium_stone.setPosition(280, 520);
+
+    sf::Font balance;
+    sf::Text balance_gold_text_n;
+    sf::Text balance_gold_text_r;
+    sf::Text balance_etherium_text_n;
+    sf::Text balance_etherium_text_r;
+    sf::Text balance_pandorium_text_n;
+    sf::Text balance_pandorium_text_r;
+    balance.loadFromFile("Fonts/file.ttf");
+    balance_gold_text_n.setFont(balance);
+    balance_gold_text_r.setFont(balance);
+    balance_gold_text_n.setCharacterSize(20);
+    balance_gold_text_r.setCharacterSize(20);
+    balance_gold_text_n.setFillColor(sf::Color::Yellow);
+    balance_gold_text_r.setFillColor(sf::Color::Yellow);
+    balance_gold_text_n.move(200, 600);
+    balance_gold_text_r.move(200, 650);
+
+    balance_etherium_text_n.setFont(balance);
+    balance_etherium_text_n.setCharacterSize(20);
+    balance_etherium_text_n.setFillColor(sf::Color::Red);
+    balance_etherium_text_n.move(250, 600);
+    balance_etherium_text_r.setFont(balance);
+    balance_etherium_text_r.setCharacterSize(20);
+    balance_etherium_text_r.setFillColor(sf::Color::Red);
+    balance_etherium_text_r.move(250, 650);
+
+    balance_pandorium_text_n.setFont(balance);
+    balance_pandorium_text_n.setCharacterSize(20);
+    balance_pandorium_text_n.setFillColor(sf::Color(198, 115, 255));
+    balance_pandorium_text_n.move(300, 600);
+    balance_pandorium_text_r.setFont(balance);
+    balance_pandorium_text_r.setCharacterSize(20);
+    balance_pandorium_text_r.setFillColor(sf::Color(198, 115, 255));
+    balance_pandorium_text_r.move(300, 650);
+
+    balance_gold_text_n.setString(std::to_string(townhall_nature.return_balance_gold()));
+    balance_etherium_text_n.setString(std::to_string(townhall_nature.return_balance_etherium()));
+    balance_pandorium_text_n.setString(std::to_string(townhall_nature.return_balance_pandorium()));
+
+    balance_gold_text_r.setString(std::to_string(townhall_robot.return_balance_gold()));
+    balance_etherium_text_r.setString(std::to_string(townhall_robot.return_balance_etherium()));
+    balance_pandorium_text_r.setString(std::to_string(townhall_robot.return_balance_pandorium()));
+
 
     sf::Vector2f p;
     int prev_i = 0;
@@ -705,37 +801,66 @@ int main()
                     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
                     for (int i = 0; i < entities.size(); ++i)
                     {
-                       
+
                         if (entities[i].return_drawing().getGlobalBounds().contains(mousePosition.x, mousePosition.y))
                         {
-                            if (entities[i].return_drawing().getGlobalBounds().left > 1400)
-                            {
-                                entities[i].on_map();
-                            }
-
-                            else
-                            {
-                                prev_i = selectedEntityIndex;
-                                selectedEntityIndex = i;
-                                break;
-                            }
+                            prev_i = selectedEntityIndex;
+                            selectedEntityIndex = i;
+                            break;
                         }
                     }
-                    if (turn_cnt % 2 == 0)
-                        selected_team = 'n';
-                    else selected_team = 'r';
+                    selected_team = entities[selectedEntityIndex].return_team();
                     
                     if (button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
                     {
                         turn_cnt++;
+                        cnt_r++;
+                        cnt_n++;
+                        std::cout << selectedEntityIndex << ' ' << selected_team<<' ' << can_move_n << ' ' << can_move_r << '\n';
+                        if (selected_team == 'n')
+                        {
+                            townhall_nature.update_gold();
+                            townhall_nature.update_etherium();
+                            townhall_nature.update_pandorium();
+                            balance_gold_text_n.setString(std::to_string(townhall_nature.return_balance_gold()));
+                            balance_etherium_text_n.setString(std::to_string(townhall_nature.return_balance_etherium()));
+                            balance_pandorium_text_n.setString(std::to_string(townhall_nature.return_balance_pandorium()));
+                        }
+                        else
+                        {
+                            townhall_robot.update_gold();
+                            townhall_robot.update_etherium();
+                            townhall_robot.update_pandorium();
+                            balance_gold_text_r.setString(std::to_string(townhall_robot.return_balance_gold()));
+                            balance_etherium_text_r.setString(std::to_string(townhall_robot.return_balance_etherium()));
+                            balance_pandorium_text_r.setString(std::to_string(townhall_robot.return_balance_pandorium()));
+                        }
                         for (int i = 0; i < entities.size(); i++)
                         {
-                             entities[i].turns_set_to();
+                            entities[i].turns_set_to();
+                        }
+                        if (capturing_status_nature && cnt_n == 3 && entities[selectedEntityIndex].return_team()=='n')
+                        {
+                            map[entities[selectedEntityIndex].return_i()].status = 'n';
+                            capturing_status_nature = false;
+                        }
+                        else if (capturing_status_robot && cnt_r == 3 && entities[selectedEntityIndex].return_team() == 'r')
+                        {
+                            map[entities[selectedEntityIndex].return_i()].status = 'r';
+                            capturing_status_robot = false;
                         }
                     }
-                   
+
                 }
-            entities[prev_i].on_map();
+            if (capturing_status_nature && entities[selectedEntityIndex].return_tier() == 0 && entities[selectedEntityIndex].return_team() == 'n')
+                    can_move_n = false;
+            else if(selected_team == 'n' && !capturing_status_nature) can_move_n = true;
+            if (capturing_status_robot && entities[selectedEntityIndex].return_tier() == 0 && entities[selectedEntityIndex].return_team() == 'r')
+                can_move_r = false;
+            else if(!capturing_status_robot  && selected_team == 'r') can_move_r = true;
+
+
+            entities[prev_i].spawn();
 
 
             if (selectedEntityIndex != -1)
@@ -744,68 +869,115 @@ int main()
                 if (event.type == sf::Event::KeyPressed)
                 {
 
-                    if (event.key.code == sf::Keyboard::Z && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    if (event.key.code == sf::Keyboard::Z && entities[selectedEntityIndex].return_turns() > 0)
                     {
-                        entities[selectedEntityIndex].decrease_turns();
-                        entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                        std::cout << turns_left << '\n';
-                    }
-                    else if (event.key.code == sf::Keyboard::X && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
-                    {
-                        entities[selectedEntityIndex].decrease_turns();
-                        entities[selectedEntityIndex].move_X(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                        if ((can_move_n && entities[selectedEntityIndex].return_team() == 'n'))
+                        {
+                            entities[selectedEntityIndex].decrease_turns();
+                            entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                       
+                        }
+                        else if ((can_move_r && entities[selectedEntityIndex].return_team() == 'r'))
+                        {
+                            entities[selectedEntityIndex].decrease_turns();
+                            entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
 
+                        }
                     }
-                    else if (event.key.code == sf::Keyboard::A && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    else if (event.key.code == sf::Keyboard::X && entities[selectedEntityIndex].return_turns() > 0 )
                     {
-                        entities[selectedEntityIndex].decrease_turns();
-                        entities[selectedEntityIndex].move_A(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-
+                        if ((can_move_n && selected_team == 'n') || (can_move_r && selected_team == 'r'))
+                        {
+                            entities[selectedEntityIndex].decrease_turns();
+                            entities[selectedEntityIndex].move_X(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                        }
                     }
-                    else if (event.key.code == sf::Keyboard::W && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    else if (event.key.code == sf::Keyboard::A && entities[selectedEntityIndex].return_turns() > 0 )
                     {
-                        entities[selectedEntityIndex].decrease_turns();
-                        entities[selectedEntityIndex].move_W(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-
+                        if ((can_move_n && selected_team == 'n') || (can_move_r && selected_team == 'r'))
+                        {
+                            entities[selectedEntityIndex].decrease_turns();
+                            entities[selectedEntityIndex].move_A(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                        }
                     }
-                    else if (event.key.code == sf::Keyboard::E && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    else if (event.key.code == sf::Keyboard::W && entities[selectedEntityIndex].return_turns() > 0)
                     {
-                        entities[selectedEntityIndex].decrease_turns();
-                        entities[selectedEntityIndex].move_E(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-
+                        if ((can_move_n && selected_team == 'n') || (can_move_r && selected_team == 'r'))
+                        {
+                            entities[selectedEntityIndex].decrease_turns();
+                            entities[selectedEntityIndex].move_W(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                        }
+                    }
+                    else if (event.key.code == sf::Keyboard::E && entities[selectedEntityIndex].return_turns() > 0 )
+                    {
+                        if ((can_move_n && selected_team == 'n') || (can_move_r && selected_team == 'r'))
+                        {
+                            entities[selectedEntityIndex].decrease_turns();
+                            entities[selectedEntityIndex].move_E(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                        }
                     }
                     else if (event.key.code == sf::Keyboard::D && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
                     {
-                        entities[selectedEntityIndex].decrease_turns();
-                        entities[selectedEntityIndex].move_D(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-
+                        if ((can_move_n && selected_team == 'n') || (can_move_r && selected_team == 'r'))
+                        {
+                            entities[selectedEntityIndex].decrease_turns();
+                            entities[selectedEntityIndex].move_D(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                        }
 
                     }
+
                 }
+                if (map[entities[selectedEntityIndex].return_i()].status == 'g' && entities[selectedEntityIndex].return_tier() == 0)
+                {
+                    if (entities[selectedEntityIndex].return_team() == 'n' && cnt_n>3)
+                    {
+                        capturing_status_nature = true;
+                        cnt_n = 0;
+                    }
+                    else if(entities[selectedEntityIndex].return_team() == 'r' && cnt_r > 3)
+                    {
+                        capturing_status_robot = true;
+                        cnt_r = 0;
+                    }
+                }
+
             }
         }
 
 
 
-        window.clear();
+
+
         build_map(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY, window);
-        Townhall townhall_nature(25, 'n', side);
         townhall_nature.draw(window);
-        Townhall townhall_robot(263, 'r', side);
         townhall_robot.draw(window);
         Hut barracks_nature(42, 'n', side);
         balance_g = townhall_nature.return_balance_gold();
-        barracks_nature.buy(window, balance_g, clock);
+        //barracks_nature.buy(window, balance_g, clock);
         Hut barracks_robot(210, 'r', side);
         balance_g = townhall_robot.return_balance_gold();
-        barracks_robot.buy(window, balance_g, clock);
+        //barracks_robot.buy(window, balance_g, clock);
         instructions(window, button);
         for (int i = 0; i < entities.size(); i++)
         {
             window.draw(entities[i].return_drawing());
         }
         window.draw(entities[selectedEntityIndex].return_drawing());
-
+        window.draw(hider_n_g);
+        window.draw(balance_gold_text_n);
+        window.draw(hider_r_g);
+        window.draw(balance_gold_text_r);
+        window.draw(hider_n_e);
+        window.draw(balance_etherium_text_n);
+        window.draw(hider_r_e);
+        window.draw(balance_etherium_text_r);
+        window.draw(hider_n_p);
+        window.draw(balance_pandorium_text_n);
+        window.draw(hider_r_p);
+        window.draw(balance_pandorium_text_r);
+        window.draw(gold_stone);
+        window.draw(etherium_stone);
+        window.draw(pandorium_stone);
         window.display();
 
     }
