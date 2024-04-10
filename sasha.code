@@ -669,7 +669,8 @@ int main()
     int cnt_n = 4;
     int cnt_r = 4;
     char selected_team = 'n';
-    int turn_cnt = 0;
+    char selected_team_entity = 'n';
+    int turn_cnt = 1;
     sf::Clock clock;
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
     sf::Sprite button;
@@ -715,6 +716,20 @@ int main()
     hider_r_p.setPosition(300, 650);
     Townhall townhall_nature(25, 'n', side);
     Townhall townhall_robot(263, 'r', side);
+
+    sf::Font turn_text;
+    turn_text.loadFromFile("Fonts/file.ttf");
+    sf::Text turn_t;
+    turn_t.setFont(turn_text);
+    turn_t.setCharacterSize(30);
+    turn_t.setFillColor(sf::Color::Yellow);
+    turn_t.move(800, 20);
+    turn_t.setString("Nature's turn");
+    window.draw(turn_t);
+    sf::RectangleShape hider_turn(sf::Vector2f(300, 50));
+    hider_turn.setFillColor(sf::Color::Black);
+    hider_turn.setPosition(800, 20);
+
 
     sf::Sprite gold_stone;
     sf::Texture gold;
@@ -813,11 +828,16 @@ int main()
                     if (turn_cnt % 2 == 0)
                         selected_team = 'n';
                     else selected_team = 'r';
+                    
+                    selected_team_entity = entities[selectedEntityIndex].return_team();
                     if (button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
                     {
                         turn_cnt++;
                         cnt_r++;
                         cnt_n++;
+                        if (selected_team == 'n')
+                            turn_t.setString("Nature's turn");
+                        else turn_t.setString("Robot's turn");
                         if (selected_team == 'n')
                         {
                             townhall_nature.update_gold();
@@ -871,50 +891,50 @@ int main()
                 if (event.type == sf::Event::KeyPressed)
                 {
 
-                    if (event.key.code == sf::Keyboard::Z && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    if (event.key.code == sf::Keyboard::Z && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team_entity)
                     {
-                        if ((can_move_n && selected_team =='n') || (can_move_r && selected_team == 'r'))
+                        if ((can_move_n && selected_team_entity =='n') || (can_move_r && selected_team_entity == 'r'))
                         {
                             entities[selectedEntityIndex].decrease_turns();
                             entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
                             std::cout << turns_left << '\n';
                         }
                     }
-                    else if (event.key.code == sf::Keyboard::X && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team )
+                    else if (event.key.code == sf::Keyboard::X && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team_entity )
                     {
-                        if ((can_move_n && selected_team == 'n') || (can_move_r && selected_team == 'r'))
+                        if ((can_move_n && selected_team_entity == 'n') || (can_move_r && selected_team_entity == 'r'))
                         {
                             entities[selectedEntityIndex].decrease_turns();
                             entities[selectedEntityIndex].move_X(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
                         }
                     }
-                    else if (event.key.code == sf::Keyboard::A && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    else if (event.key.code == sf::Keyboard::A && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team_entity)
                     {
-                        if ((can_move_n && selected_team == 'n') || (can_move_r && selected_team == 'r'))
+                        if ((can_move_n && selected_team_entity == 'n') || (can_move_r && selected_team_entity == 'r'))
                         {
                             entities[selectedEntityIndex].decrease_turns();
                             entities[selectedEntityIndex].move_A(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
                         }
                     }
-                    else if (event.key.code == sf::Keyboard::W && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team )
+                    else if (event.key.code == sf::Keyboard::W && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team_entity )
                     {
-                        if ((can_move_n && selected_team == 'n') || (can_move_r && selected_team == 'r'))
+                        if ((can_move_n && selected_team_entity == 'n') || (can_move_r && selected_team_entity == 'r'))
                         {
                             entities[selectedEntityIndex].decrease_turns();
                             entities[selectedEntityIndex].move_W(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
                         }
                     }
-                    else if (event.key.code == sf::Keyboard::E && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team )
+                    else if (event.key.code == sf::Keyboard::E && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team_entity )
                     {
-                        if ((can_move_n && selected_team == 'n') || (can_move_r && selected_team == 'r'))
+                        if ((can_move_n && selected_team_entity == 'n') || (can_move_r && selected_team_entity == 'r'))
                         {
                             entities[selectedEntityIndex].decrease_turns();
                             entities[selectedEntityIndex].move_E(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
                         }
                     }
-                    else if (event.key.code == sf::Keyboard::D && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team)
+                    else if (event.key.code == sf::Keyboard::D && entities[selectedEntityIndex].return_turns() > 0 && entities[selectedEntityIndex].return_team() == selected_team_entity)
                     {
-                        if ((can_move_n && selected_team == 'n') || (can_move_r && selected_team == 'r'))
+                        if ((can_move_n && selected_team_entity == 'n') || (can_move_r && selected_team_entity == 'r'))
                         {
                             entities[selectedEntityIndex].decrease_turns();
                             entities[selectedEntityIndex].move_D(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
@@ -955,6 +975,7 @@ int main()
         {
             window.draw(entities[i].return_drawing());
         }
+        
         window.draw(entities[selectedEntityIndex].return_drawing());
         window.draw(hider_n_g);
         window.draw(balance_gold_text_n);
@@ -971,6 +992,8 @@ int main()
         window.draw(gold_stone);
         window.draw(etherium_stone);
         window.draw(pandorium_stone);
+        window.draw(hider_turn);
+        window.draw(turn_t);
         window.display();
 
     }
