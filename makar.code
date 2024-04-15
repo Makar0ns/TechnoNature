@@ -847,7 +847,7 @@ int main()
                         if (selected_team == 'n')
                         {
                             
-                            cnt_n= cnt_n+2;
+                            cnt_n++;
                             turn_t.setString("Nature's turn");
                             townhall_nature.update_gold();
                             townhall_nature.update_etherium();
@@ -864,7 +864,7 @@ int main()
                         }
                         else
                         {
-                            cnt_r=cnt_r+2;
+                            cnt_r++;
                             turn_t.setString("Robot's turn");
                             townhall_robot.update_gold();
                             townhall_robot.update_etherium();
