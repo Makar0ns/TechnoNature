@@ -662,10 +662,10 @@ public:
 int main()
 {
     int turns_left;
-    
+
     char selected_team = 'n';
     int turn_cnt = 1;
-    int capturing_n_i, capturing_r_i;
+   
     sf::Clock clock;
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
     sf::Sprite button;
@@ -790,8 +790,8 @@ int main()
     balance_gold_text_r.setString(std::to_string(townhall_robot.return_balance_gold()));
     balance_etherium_text_r.setString(std::to_string(townhall_robot.return_balance_etherium()));
     balance_pandorium_text_r.setString(std::to_string(townhall_robot.return_balance_pandorium()));
-    bool capturing_n, capturing_r;
-    int cnt_n = 0, cnt_r = 0;
+    bool capturing_n = true, capturing_r;
+    int cnt_n = 1, cnt_r = 3;
 
     sf::Vector2f p;
     int prev_i = 0;
@@ -827,26 +827,33 @@ int main()
                     {
                         turn_cnt++;
                         if (turn_cnt % 2 == 0)
+                        {
                             selected_team = 'r';
-                        else selected_team = 'n';
+                            selectedEntityIndex = 0;
+                        }
+                        else
+                        {
+                            selected_team = 'n';
+                            selectedEntityIndex = 1;
+                        }
                         if (map[entities[selectedEntityIndex].return_i()].status == 'g')
                         {
-                            if (selected_team == 'n')
+                            if (selected_team == 'n' && cnt_n >= 2)
                             {
                                 capturing_n = true;
                                 cnt_n = 0;
                             }
-                            else
+                            else if (selected_team == 'r' && cnt_r >= 2)
                             {
                                 capturing_r = true;
                                 cnt_r = 0;
                             }
                         }
 
-                        
+
                         if (selected_team == 'n')
                         {
-                            
+
                             cnt_n++;
                             turn_t.setString("Nature's turn");
                             townhall_nature.update_gold();
@@ -855,12 +862,8 @@ int main()
                             balance_gold_text_n.setString(std::to_string(townhall_nature.return_balance_gold()));
                             balance_etherium_text_n.setString(std::to_string(townhall_nature.return_balance_etherium()));
                             balance_pandorium_text_n.setString(std::to_string(townhall_nature.return_balance_pandorium()));
-                           
-                            if (cnt_n == 2 && capturing_n)
-                            {
-                                map[entities[selectedEntityIndex].return_i()].status = 'n';
-                                capturing_n = false;
-                            }
+
+
                         }
                         else
                         {
@@ -872,21 +875,29 @@ int main()
                             balance_gold_text_r.setString(std::to_string(townhall_robot.return_balance_gold()));
                             balance_etherium_text_r.setString(std::to_string(townhall_robot.return_balance_etherium()));
                             balance_pandorium_text_r.setString(std::to_string(townhall_robot.return_balance_pandorium()));
-                           
-                            if (cnt_r == 2 && capturing_r)
-                            {
-                                map[entities[selectedEntityIndex].return_i()].status = 'r';
-                                capturing_r = false;
-                            }
+
+
+                        }
+                        if (cnt_n == 2 && capturing_n && entities[selectedEntityIndex].return_tier() == 0)
+                        {
+                            
+                             map[entities[selectedEntityIndex].return_i()].status = 'n';
+                            capturing_n = false;
+                        }
+                        if (cnt_r == 2 && capturing_r && entities[selectedEntityIndex].return_tier() == 0)
+                        {
+                            
+                            map[entities[selectedEntityIndex].return_i()].status = 'r';
+                            capturing_r = false;
                         }
                         for (int i = 0; i < entities.size(); i++)
                         {
                             entities[i].turns_set_to();
                         }
-                     
+
                         std::cout << selected_team << ' ' << capturing_n << ' ' << capturing_r << ' ' << cnt_n << ' ' << cnt_r << '\n';
                     }
-                    
+
 
 
 
@@ -913,7 +924,7 @@ int main()
 
                             entities[selectedEntityIndex].decrease_turns();
                             entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                            std::cout << turns_left << '\n';
+
 
                         }
                         else if (event.key.code == sf::Keyboard::X)
