@@ -520,7 +520,7 @@ public:
 void instructions(sf::RenderWindow& window, sf::Sprite& button)
 {
     sf::Texture button_texture;
-    button_texture.loadFromFile("images/endturn.png");
+    button_texture.loadFromFile("images/end_turn.png");
     button.setTexture(button_texture);
     button.setScale(0.4, 0.4);
     button.setPosition(1430, 700);
@@ -662,15 +662,14 @@ public:
 int main()
 {
     int turns_left;
-    bool capturing_n = false, capturing_r = false;
-    int cnt_n=0, cnt_r = 0;
+
     char selected_team = 'n';
     int turn_cnt = 1;
     int capturing_n_i, capturing_r_i;
     sf::Clock clock;
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
     sf::Sprite button;
-    
+
     bool spawned = true;
     bool allow_move;
     float dx = 0, dy = 0;
@@ -791,7 +790,8 @@ int main()
     balance_gold_text_r.setString(std::to_string(townhall_robot.return_balance_gold()));
     balance_etherium_text_r.setString(std::to_string(townhall_robot.return_balance_etherium()));
     balance_pandorium_text_r.setString(std::to_string(townhall_robot.return_balance_pandorium()));
-
+    bool capturing_n, capturing_r;
+    int cnt_n = 3, cnt_r = 3;
 
     sf::Vector2f p;
     int prev_i = 0;
@@ -822,49 +822,88 @@ int main()
                         }
                     }
 
-                    
+
                     if (button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
                     {
                         turn_cnt++;
                         if (turn_cnt % 2 == 0)
                             selected_team = 'r';
                         else selected_team = 'n';
-                        if (selected_team == 'n')
-                            turn_t.setString("Nature's turn");
-                        else turn_t.setString("Robot's turn");
+                        if (map[entities[selectedEntityIndex].return_i()].status == 'g')
+                        {
+                            if (selected_team == 'n' && cnt_n>=2)
+                            {
+                                capturing_n = true;
+                                cnt_n = 0;
+                            }
+                            else if(cnt_r>=2)
+                            {
+                                capturing_r = true;
+                                cnt_r = 0;
+                            }
+                        }
+
+
                         if (selected_team == 'n')
                         {
+
+                            cnt_n++;
+                            turn_t.setString("Nature's turn");
                             townhall_nature.update_gold();
                             townhall_nature.update_etherium();
                             townhall_nature.update_pandorium();
                             balance_gold_text_n.setString(std::to_string(townhall_nature.return_balance_gold()));
                             balance_etherium_text_n.setString(std::to_string(townhall_nature.return_balance_etherium()));
                             balance_pandorium_text_n.setString(std::to_string(townhall_nature.return_balance_pandorium()));
+
+                            
                         }
                         else
                         {
+                            cnt_r++;
+                            turn_t.setString("Robot's turn");
                             townhall_robot.update_gold();
                             townhall_robot.update_etherium();
                             townhall_robot.update_pandorium();
                             balance_gold_text_r.setString(std::to_string(townhall_robot.return_balance_gold()));
                             balance_etherium_text_r.setString(std::to_string(townhall_robot.return_balance_etherium()));
                             balance_pandorium_text_r.setString(std::to_string(townhall_robot.return_balance_pandorium()));
+
+                            
+                        }
+                        if (cnt_n == 2 && capturing_n && entities[selectedEntityIndex].return_tier()==0)
+                        {
+                            if(selected_team==entities[selectedEntityIndex].return_team())
+                                map[entities[selectedEntityIndex].return_i()].status = 'n';
+                            else map[entities[selectedEntityIndex].return_i()].status = 'r';
+                            capturing_n = false;
+                        }
+                        if (cnt_r == 2 && capturing_r && entities[selectedEntityIndex].return_tier() == 0)
+                        {
+                            if (selected_team == entities[selectedEntityIndex].return_team())
+                                map[entities[selectedEntityIndex].return_i()].status = 'r';
+                            else map[entities[selectedEntityIndex].return_i()].status = 'n';
+                            capturing_r = false;
                         }
                         for (int i = 0; i < entities.size(); i++)
                         {
                             entities[i].turns_set_to();
                         }
+
+                        std::cout << selected_team << ' ' << capturing_n << ' ' << capturing_r << ' ' << cnt_n << ' ' << cnt_r << '\n';
                     }
-                    
+
+
+
 
 
                 }
-            
+
 
 
             entities[prev_i].spawn();
 
-            
+
             if (selectedEntityIndex != -1)
             {
                 if (selected_team != entities[selectedEntityIndex].return_team())
@@ -880,50 +919,50 @@ int main()
 
                             entities[selectedEntityIndex].decrease_turns();
                             entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                            std::cout << turns_left << '\n';
+                            
 
                         }
                         else if (event.key.code == sf::Keyboard::X)
                         {
-                            
-                                entities[selectedEntityIndex].decrease_turns();
-                                entities[selectedEntityIndex].move_X(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                            
+
+                            entities[selectedEntityIndex].decrease_turns();
+                            entities[selectedEntityIndex].move_X(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+
                         }
                         else if (event.key.code == sf::Keyboard::A)
                         {
-                            
-                                entities[selectedEntityIndex].decrease_turns();
-                                entities[selectedEntityIndex].move_A(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                            
+
+                            entities[selectedEntityIndex].decrease_turns();
+                            entities[selectedEntityIndex].move_A(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+
                         }
                         else if (event.key.code == sf::Keyboard::W)
                         {
-                            
-                                entities[selectedEntityIndex].decrease_turns();
-                                entities[selectedEntityIndex].move_W(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                            
+
+                            entities[selectedEntityIndex].decrease_turns();
+                            entities[selectedEntityIndex].move_W(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+
                         }
                         else if (event.key.code == sf::Keyboard::E)
                         {
-                           
-                                entities[selectedEntityIndex].decrease_turns();
-                                entities[selectedEntityIndex].move_E(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                            
+
+                            entities[selectedEntityIndex].decrease_turns();
+                            entities[selectedEntityIndex].move_E(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+
                         }
                         else if (event.key.code == sf::Keyboard::D)
                         {
-                            
-                                entities[selectedEntityIndex].decrease_turns();
-                                entities[selectedEntityIndex].move_D(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
-                            
+
+                            entities[selectedEntityIndex].decrease_turns();
+                            entities[selectedEntityIndex].move_D(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+
 
                         }
                     }
                 }
-                
-                 
-                
+
+
+
 
             }
         }
