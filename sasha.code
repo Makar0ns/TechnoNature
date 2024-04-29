@@ -24,6 +24,7 @@ void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical, 
     map[6].status = 'w';
     map[8].status = 'w';
     map[25].status = 'n';
+    map[263].status = 'r';
     map[72].status = 'w';
     map[74].status = 'w';
     map[109].status = 't';
@@ -97,7 +98,7 @@ void create_map_coords(int side, int numberOfHexagons_horizontal, int numberOfHe
     int current_i;
     float horizontalSpacing = side * sqrt(3) / 2;
     float verticalSpacing = 1.5 * side;
-    int g;
+    int g=0;
     for (int j = 0; j < numberOfHexagons_horizontal - 1; ++j)
     {
         sign = -1;
@@ -138,7 +139,7 @@ void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_v
     int current_i;
     float horizontalSpacing = side * sqrt(3) / 2;
     float verticalSpacing = 1.5 * side;
-    int g;
+    int g=0;
     sf::Texture water;
     sf::Texture nature;
     sf::Texture robot;
@@ -384,12 +385,12 @@ public:
     {
         return unit_tier;
     }
-    void move_Z(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
+    bool move_Z(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
         check = true;
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) - 3;
-        if (position.x - distance<left_border || position.y + distance >down_border) check = false;
+        if (position.x - distance<left_border || position.y + distance >down_border) return false;
         if (check)
         {
             p = entity.return_drawing().getPosition();
@@ -403,17 +404,19 @@ public:
             {
                 entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
+                return false;
 
             }
         }
+        return true;
 
     }
-    void move_X(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
+    bool move_X(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
         check = true;
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) - 3;
-        if (position.x + distance > right_border || position.y + distance > down_border) check = false;
+        if (position.x + distance > right_border || position.y + distance > down_border) return false;
         if (check)
         {
             p = entity.return_drawing().getPosition();
@@ -426,16 +429,18 @@ public:
             {
                 entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
+                return false;
             }
         }
+        return true;
     }
-    void move_D(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
+    bool move_D(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
         check = true;
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) + 5;
         if (position.x + distance > right_border)
-            check = false;
+            return false;
         if (check)
         {
             p = entity.return_drawing().getPosition();
@@ -446,16 +451,18 @@ public:
             {
                 entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
+                return false;
             }
         }
+        return true;
     }
-    void move_E(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
+    bool move_E(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
         check = true;
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3), vert_distance = side * sqrt(3) * 2;
         if (position.x + distance > right_border || position.y - vert_distance < upper_border)
-            check = false;
+            return false;
         if (check)
         {
             p = entity.return_drawing().getPosition();
@@ -468,17 +475,18 @@ public:
             {
                 entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
-
+                return false;
             }
         }
+        return true;
     }
-    void move_W(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
+    bool move_W(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
         check = true;
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3), vert_distance = side * sqrt(3) * 2;
         if (position.x - distance < left_border || position.y - vert_distance < upper_border)
-            check = false;
+            return false;
         if (check)
         {
             p = entity.return_drawing().getPosition();
@@ -491,17 +499,18 @@ public:
             {
                 entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
-
+                return false;
             }
         }
+        return true;
     }
-    void move_A(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
+    bool move_A(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
         check = true;
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) * 1.5;
         if (position.x - distance < left_border)
-            check = false;
+            return false;
         if (check)
         {
             p = entity.return_drawing().getPosition();
@@ -512,9 +521,10 @@ public:
             {
                 entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
-
+                return false;
             }
         }
+        return true;
     }
 };
 void instructions(sf::RenderWindow& window, sf::Sprite& button)
@@ -665,7 +675,7 @@ int main()
 
     char selected_team = 'n';
     int turn_cnt = 1;
-    int capturing_n_i, capturing_r_i;
+
     sf::Clock clock;
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
     sf::Sprite button;
@@ -790,12 +800,13 @@ int main()
     balance_gold_text_r.setString(std::to_string(townhall_robot.return_balance_gold()));
     balance_etherium_text_r.setString(std::to_string(townhall_robot.return_balance_etherium()));
     balance_pandorium_text_r.setString(std::to_string(townhall_robot.return_balance_pandorium()));
-    bool capturing_n, capturing_r;
-    int cnt_n = 3, cnt_r = 3;
-
+    bool capturing_n = false, capturing_r=false;
+    int cnt_n = 2, cnt_r = 3;
+    townhall_nature.update_gold();
+    balance_gold_text_n.setString(std::to_string(townhall_nature.return_balance_gold()));
     sf::Vector2f p;
     int prev_i = 0;
-    int selectedEntityIndex = 0;
+    int selectedEntityIndex = 1;
     while (window.isOpen())
     {
         sf::Vector2i pos = sf::Mouse::getPosition(window);
@@ -827,16 +838,23 @@ int main()
                     {
                         turn_cnt++;
                         if (turn_cnt % 2 == 0)
+                        {
                             selected_team = 'r';
-                        else selected_team = 'n';
+                            selectedEntityIndex = 0;
+                        }
+                        else
+                        {
+                            selected_team = 'n';
+                            selectedEntityIndex = 1;
+                        }
                         if (map[entities[selectedEntityIndex].return_i()].status == 'g')
                         {
-                            if (selected_team == 'n' && cnt_n>=2)
+                            if (selected_team == 'n' && cnt_n >= 2)
                             {
                                 capturing_n = true;
                                 cnt_n = 0;
                             }
-                            else if(cnt_r>=2)
+                            else if (selected_team == 'r' && cnt_r >= 2)
                             {
                                 capturing_r = true;
                                 cnt_r = 0;
@@ -856,7 +874,7 @@ int main()
                             balance_etherium_text_n.setString(std::to_string(townhall_nature.return_balance_etherium()));
                             balance_pandorium_text_n.setString(std::to_string(townhall_nature.return_balance_pandorium()));
 
-                            
+
                         }
                         else
                         {
@@ -869,20 +887,18 @@ int main()
                             balance_etherium_text_r.setString(std::to_string(townhall_robot.return_balance_etherium()));
                             balance_pandorium_text_r.setString(std::to_string(townhall_robot.return_balance_pandorium()));
 
-                            
+
                         }
-                        if (cnt_n == 2 && capturing_n && entities[selectedEntityIndex].return_tier()==0)
+                        if (cnt_n == 2 && capturing_n && entities[selectedEntityIndex].return_tier() == 0)
                         {
-                            if(selected_team==entities[selectedEntityIndex].return_team())
-                                map[entities[selectedEntityIndex].return_i()].status = 'n';
-                            else map[entities[selectedEntityIndex].return_i()].status = 'r';
+
+                            map[entities[selectedEntityIndex].return_i()].status = 'n';
                             capturing_n = false;
                         }
                         if (cnt_r == 2 && capturing_r && entities[selectedEntityIndex].return_tier() == 0)
                         {
-                            if (selected_team == entities[selectedEntityIndex].return_team())
-                                map[entities[selectedEntityIndex].return_i()].status = 'r';
-                            else map[entities[selectedEntityIndex].return_i()].status = 'n';
+
+                            map[entities[selectedEntityIndex].return_i()].status = 'r';
                             capturing_r = false;
                         }
                         for (int i = 0; i < entities.size(); i++)
@@ -890,7 +906,7 @@ int main()
                             entities[i].turns_set_to();
                         }
 
-                        std::cout << selected_team << ' ' << capturing_n << ' ' << capturing_r << ' ' << cnt_n << ' ' << cnt_r << '\n';
+                        
                     }
 
 
@@ -906,9 +922,22 @@ int main()
 
             if (selectedEntityIndex != -1)
             {
-                if (selected_team != entities[selectedEntityIndex].return_team())
-                    allow_move = false;
-                else allow_move = true;
+                
+                if (selected_team == entities[selectedEntityIndex].return_team())
+                {
+                    
+                    if (entities[selectedEntityIndex].return_tier() == 0)
+                    {
+                        if (selected_team == 'n' && capturing_n)
+                            allow_move = false;
+                        else if (selected_team == 'r' && capturing_r)
+                            allow_move = false;
+                        else allow_move = true;
+                    }
+                    else allow_move = true;
+                }
+                else allow_move = false;
+                
                 if (event.type == sf::Event::KeyPressed)
                 {
                     if (entities[selectedEntityIndex].return_turns() > 0 && allow_move)
@@ -917,44 +946,50 @@ int main()
                         {
 
 
-                            entities[selectedEntityIndex].decrease_turns();
-                            entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
                             
+                            if (entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]))
+                                    entities[selectedEntityIndex].decrease_turns();
+
 
                         }
                         else if (event.key.code == sf::Keyboard::X)
                         {
 
-                            entities[selectedEntityIndex].decrease_turns();
-                            entities[selectedEntityIndex].move_X(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                            
+                            if(entities[selectedEntityIndex].move_X(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]))
+                                entities[selectedEntityIndex].decrease_turns();
 
                         }
                         else if (event.key.code == sf::Keyboard::A)
                         {
 
-                            entities[selectedEntityIndex].decrease_turns();
-                            entities[selectedEntityIndex].move_A(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                            
+                            if(entities[selectedEntityIndex].move_A(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]))
+                                entities[selectedEntityIndex].decrease_turns();
 
                         }
                         else if (event.key.code == sf::Keyboard::W)
                         {
 
-                            entities[selectedEntityIndex].decrease_turns();
-                            entities[selectedEntityIndex].move_W(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                          
+                            if(entities[selectedEntityIndex].move_W(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]))
+                                entities[selectedEntityIndex].decrease_turns();
 
                         }
                         else if (event.key.code == sf::Keyboard::E)
                         {
 
-                            entities[selectedEntityIndex].decrease_turns();
-                            entities[selectedEntityIndex].move_E(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                           
+                           if( entities[selectedEntityIndex].move_E(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]))
+                                entities[selectedEntityIndex].decrease_turns();
 
                         }
                         else if (event.key.code == sf::Keyboard::D)
                         {
 
-                            entities[selectedEntityIndex].decrease_turns();
-                            entities[selectedEntityIndex].move_D(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]);
+                           
+                           if( entities[selectedEntityIndex].move_D(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]))
+                                entities[selectedEntityIndex].decrease_turns();
 
 
                         }
