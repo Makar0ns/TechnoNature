@@ -677,7 +677,7 @@ int main()
     int turn_cnt = 1;
 
     sf::Clock clock;
-    sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML Hexagons");
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), "TechnoNature");
     sf::Sprite button;
 
     bool spawned = true;
