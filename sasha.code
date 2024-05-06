@@ -148,6 +148,8 @@ void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_v
     sf::Texture tower_default;
     sf::Texture gray;
     sf::Texture aurum;
+    sf::Texture barracks_nature;
+    sf::Texture barracks_robot;
     water.loadFromFile("images/water_bg.png");
     nature.loadFromFile("images/nature.png");
     robot.loadFromFile("images/robot.png");
@@ -156,6 +158,8 @@ void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_v
     tower_default.loadFromFile("images/tower_default.png");
     gray.loadFromFile("images/Solid_gray.png");
     aurum.loadFromFile("images/gold_mine.png");
+    barracks_nature.loadFromFile("images/barracks_nature.png");
+    barracks_robot.loadFromFile("images/barracks_robot.png");
     sf::CircleShape hexagon(side, 6);
     hexagon.setFillColor(sf::Color::White);
     hexagon.setOutlineThickness(2);
@@ -192,12 +196,13 @@ void build_map(int side, int numberOfHexagons_horizontal, int numberOfHexagons_v
                 hexagon.setTexture(&etherium);
             else if (map[current_i].status == 'p')//pandorium
                 hexagon.setTexture(&pandorium);
+            else if (map[current_i].status == 'q')//barracks_nature
+                hexagon.setTexture(&barracks_nature);
+            else if (map[current_i].status == 'y')//barracks_robot
+                hexagon.setTexture(&barracks_robot);
             else if ((map[19].status == 'l' && current_i == 19) || (map[19].status == 'd' && current_i == 19) || (map[257].status == 'd' && current_i == 257) || (map[257].status == 'l' && current_i == 257)) hexagon.setTexture(&aurum);
             else if ((map[220].status == 'l' && current_i == 220) || (map[220].status == 'd' && current_i == 220) || (map[84].status == 'l' && current_i == 84) || (map[84].status == 'd' && current_i == 84)) hexagon.setTexture(&etherium);
             else if ((map[148].status == 'l' && current_i == 148) || (map[148].status == 'd' && current_i == 148)) hexagon.setTexture(&pandorium);
-
-
-
             window.draw(hexagon);
             sign = -sign;
             g = current_i;
@@ -256,6 +261,88 @@ public:
         side = in_side;
     }
 };
+class Townhall
+{
+private:
+    int side;
+    char team;
+    bool is_destroyed = false;
+    int hp = 10;
+    int i = 0;
+    int income_gold = 1;
+    int income_etherium = 0;
+    int income_pandorium = 0;
+    int balance_gold = 4;
+    int balance_etherium = 0;
+    int balance_pandorium = 0;
+    sf::CircleShape hexagon;
+    sf::Texture texture;
+
+public:
+    Townhall(int in_i, char team_in, int in_side)
+    {
+        i = in_i;
+        team = team_in;
+        side = in_side;
+    }
+    void draw(sf::RenderWindow& window)
+    {
+        sf::CircleShape hexagon(side, 6);
+        if (team == 'n')
+            texture.loadFromFile("Images\\tower_nature.png");
+        else texture.loadFromFile("Images\\tower_robot.png");
+        hexagon.setPosition(map[i].x, map[i].y);
+        hexagon.setTexture(&texture);
+        window.draw(hexagon);
+    }
+    void change_hp(int damage)
+    {
+        hp -= damage;
+        if (hp < 1) is_destroyed = true;
+    }
+    int is_destroyed_return()
+    {
+        return is_destroyed;
+    }
+
+    int return_balance_gold()
+    {
+        return balance_gold;
+    }
+    int return_balance_etherium()
+    {
+        return balance_etherium;
+    }
+    int return_balance_pandorium()
+    {
+        return balance_pandorium;
+    }
+    void update_gold(int mine_g_captured)
+    {
+        balance_gold += 1 + mine_g_captured * 2;
+    }
+    void update_etherium(int mine_e_captured)
+    {
+        balance_etherium += mine_e_captured;
+    }
+    void update_pandorium(int mine_p_captured)
+    {
+        balance_pandorium += mine_p_captured;
+    }
+    void change_balance_gold(int change)
+    {
+        balance_gold -= change;
+    }
+    void change_balance_etherium(int change)
+    {
+        balance_etherium -= change;
+    }
+    void change_balance_pandorium(int change)
+    {
+        balance_pandorium -= change;
+    }
+
+};
 class Hut
 {
 private:
@@ -265,12 +352,13 @@ private:
     bool is_destroyed;
     int i;
     int unit_tier;
-    int build_price = 5;
+    int build_price = 20;
     sf::Texture texture;
-    sf::CircleShape hexagon;
+    sf::Sprite hexagon;
     sf::Text text;
     sf::Font font;
-
+    sf::Sprite gold_stone;
+    sf::Texture gold;
 
 
 public:
@@ -279,43 +367,64 @@ public:
         i = in_i;
         team = team_in;
         side = in_side;
-
-
     }
-    void buy(sf::RenderWindow& window, int balance_gold, sf::Clock& clock)
+    void buy(Townhall& townhall)
     {
-        if (balance_gold >= build_price)
+        if (townhall.return_balance_gold() >= build_price)
         {
-            sf::CircleShape hexagon(side, 6);
+            sf::CircleShape hexagon1(side, 6);
             if (team == 'n')
-                texture.loadFromFile("Images\\barracks_nature.png");
-            else texture.loadFromFile("Images\\barracks_robot.png");
-            hexagon.setPosition(map[i].x, map[i].y);
-            hexagon.setTexture(&texture);
-            window.draw(hexagon);
-        }
-        else
-        {
-            sf::RectangleShape rect(sf::Vector2f(0, 0));
-            rect.setFillColor(sf::Color::Black);
-            rect.setSize(sf::Vector2f(400, 100));
-            font.loadFromFile("Fonts/file.ttf");
-            text.setFont(font);
-            text.setCharacterSize(24);
-            text.setString("NOT ENOUGH RESOURSES");
-            text.setFillColor(sf::Color::Red);
-            text.move(0, 0);
-            window.draw(text);
-            if (clock.getElapsedTime().asSeconds() >= 3)
             {
-                window.draw(rect);
+                texture.loadFromFile("images/barracks_nature.png");
+                map[i].status = 'q';
             }
+            else
+            {
+                texture.loadFromFile("images/barracks_robot.png");
+                map[i].status = 'y';
+            }
+            hexagon1.setTexture(&texture);
+            hexagon1.setPosition(map[i].x, map[i].y);
+            townhall.change_balance_gold(20);
+
+
         }
     }
+
     void change_hp(int damage)
     {
         hp -= damage;
         if (hp < 1) is_destroyed = true;
+    }
+    void spawn_barrack(sf::RenderWindow& window)
+    {
+
+        gold.loadFromFile("Images\\gold_stone.png");
+        gold_stone.setTexture(gold);
+        gold_stone.setScale(0.15, 0.15);
+        if (team == 'n')
+        {
+            texture.loadFromFile("images/barracks_nature.png");
+            hexagon.setPosition(1520, 100);
+
+            gold_stone.setPosition(1605, 113);
+        }
+        else
+        {
+            texture.loadFromFile("images/barracks_robot.png");
+            hexagon.setPosition(1720, 100);
+
+            gold_stone.setPosition(1805, 113);
+        }
+        hexagon.setTexture(texture);
+        hexagon.setScale(0.2, 0.2);
+        window.draw(hexagon);
+        window.draw(gold_stone);
+
+    }
+    sf::Sprite return_d()
+    {
+        return hexagon;
     }
 };
 class Entity
@@ -346,56 +455,69 @@ public:
         if (unit_tier == 0 && team == 'r')
         {
             texture.loadFromFile("images/robot_worker.png");
+            unit.setPosition(map[263].x + hor_space, map[263].y + ver_space);
         }
         else if (unit_tier == 0 && team == 'n')
         {
             texture.loadFromFile("images/worker_nature.png");
+            unit.setPosition(map[25].x + hor_space, map[25].y + ver_space);
         }
         else if (unit_tier == 1 && team == 'n')
         {
             texture.loadFromFile("images/warrior_nature1.png");
+            unit.setPosition(1520, 170);
         }
         else if (unit_tier == 1 && team == 'r')
         {
             texture.loadFromFile("images/warrior_robot.png");
+            unit.setPosition(1720, 170);
         }
         else if (unit_tier == 2 && team == 'n')
         {
             texture.loadFromFile("images/archer_nature.png");
+            unit.setPosition(1520, 240);
         }
         else if (unit_tier == 2 && team == 'r')
         {
             texture.loadFromFile("images/archer_robot.png");
+            unit.setPosition(1720, 240);
         }
         else if (unit_tier == 3 && team == 'n')
         {
             texture.loadFromFile("images/healer_nature.png");
+            unit.setPosition(1520, 310);
         }
         else if (unit_tier == 3 && team == 'r')
         {
             texture.loadFromFile("images/healer_robot.png");
+            unit.setPosition(1720, 310);
         }
         else if (unit_tier == 4 && team == 'n')
         {
             texture.loadFromFile("images/artillery_nature.png");
+            unit.setPosition(1520, 380);
         }
         else if (unit_tier == 4 && team == 'r')
         {
             texture.loadFromFile("images/artillery_robot.png");
+            unit.setPosition(1720, 380);
         }
         else if (unit_tier == 5 && team == 'n')
         {
             texture.loadFromFile("images/troophorse_nature.png");
+            unit.setPosition(1520, 450);
         }
         else if (unit_tier == 5 && team == 'r')
         {
             texture.loadFromFile("images/troophorse_robot.png");
+            unit.setPosition(1720, 450);
         }
 
         unit.setTexture(texture);
         unit.setScale(0.19, 0.19);
-        unit.setPosition(map[i].x + hor_space, map[i].y + ver_space);
+
     }
+
     sf::Sprite& return_drawing()
     {
         return unit;
@@ -427,6 +549,49 @@ public:
     int return_tier()
     {
         return unit_tier;
+    }
+    void buy_entity(Townhall &townhall)
+    {
+        int price_gold,price_etherium,price_pandorium;
+        if (unit_tier == 1)
+        {
+            price_gold = 10;
+            price_etherium = 0;
+            price_pandorium = 0;
+        }
+        else if (unit_tier == 2)
+        {
+            price_gold = 0;
+            price_etherium = 5;
+            price_pandorium = 0;
+        }
+        else if (unit_tier == 3)
+        {
+            price_gold = 0;
+            price_etherium = 8;
+            price_pandorium = 0;
+        }
+        else if (unit_tier == 4)
+        {
+            price_gold = 0;
+            price_etherium = 12;
+            price_pandorium = 3;
+        }
+        else if (unit_tier == 5)
+        {
+            price_gold = 0;
+            price_etherium = 15;
+            price_pandorium = 10;
+        }
+        if (townhall.return_balance_gold() >= price_gold && townhall.return_balance_etherium() >= price_etherium && townhall.return_balance_pandorium() >= price_pandorium)
+        {
+            townhall.change_balance_gold(price_gold);
+            townhall.change_balance_etherium(price_etherium);
+            townhall.change_balance_etherium(price_pandorium);
+            if (team == 'n')
+                unit.setPosition(map[57].x, map[57].y);
+            else unit.setPosition(map[227].x, map[227].y);
+        }
     }
     bool move_Z(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
     {
@@ -584,6 +749,8 @@ void instructions(sf::RenderWindow& window, sf::Sprite& button)
     sf::Text text4;
     sf::Text text5;
     sf::Text text6;
+    sf::Text text7;
+    sf::Text text8;
     sf::Font font;
     sf::RectangleShape menu(sf::Vector2f(400, 600));
     menu.setFillColor(sf::Color::Black);
@@ -627,79 +794,21 @@ void instructions(sf::RenderWindow& window, sf::Sprite& button)
     text6.setFillColor(sf::Color::White);
     text6.move(1600, 850);
     window.draw(text6);
+    text7.setFont(font);
+    text7.setCharacterSize(18);
+    text7.setString("10");
+    text7.setFillColor(sf::Color::Yellow);
+    text7.move(1580, 115);
+    window.draw(text7);
+    text8.setFont(font);
+    text8.setCharacterSize(18);
+    text8.setString("10");
+    text8.setFillColor(sf::Color::Yellow);
+    text8.move(1780, 115);
+    window.draw(text8);
     window.draw(menu);
 }
-class Townhall
-{
-private:
-    int side;
-    char team;
-    bool is_destroyed = false;
-    int hp = 10;
-    int i = 0;
-    int income_gold = 1;
-    int income_etherium = 0;
-    int income_pandorium = 0;
-    int balance_gold = 4;
-    int balance_etherium = 0;
-    int balance_pandorium = 0;
-    sf::CircleShape hexagon;
-    sf::Texture texture;
 
-public:
-    Townhall(int in_i, char team_in, int in_side)
-    {
-        i = in_i;
-        team = team_in;
-        side = in_side;
-    }
-    void draw(sf::RenderWindow& window)
-    {
-        sf::CircleShape hexagon(side, 6);
-        if (team == 'n')
-            texture.loadFromFile("Images\\tower_nature.png");
-        else texture.loadFromFile("Images\\tower_robot.png");
-        hexagon.setPosition(map[i].x, map[i].y);
-        hexagon.setTexture(&texture);
-        window.draw(hexagon);
-    }
-    void change_hp(int damage)
-    {
-        hp -= damage;
-        if (hp < 1) is_destroyed = true;
-    }
-    int is_destroyed_return()
-    {
-        return is_destroyed;
-    }
-
-    int return_balance_gold()
-    {
-        return balance_gold;
-    }
-    int return_balance_etherium()
-    {
-        return balance_etherium;
-    }
-    int return_balance_pandorium()
-    {
-        return balance_pandorium;
-    }
-    void update_gold(int mine_g_captured)
-    {
-        balance_gold += 1 + mine_g_captured * 2;
-    }
-    void update_etherium(int mine_e_captured)
-    {
-        balance_etherium += mine_e_captured;
-    }
-    void update_pandorium(int mine_p_captured)
-    {
-        balance_pandorium += mine_p_captured;
-    }
-
-
-};
 int main()
 {
     int turns_left;
@@ -762,6 +871,8 @@ int main()
     hider_r_p.setPosition(300, 650);
     Townhall townhall_nature(25, 'n', side);
     Townhall townhall_robot(263, 'r', side);
+    Hut barracks_nature(57, 'n', side);
+    Hut barracks_robot(227, 'r', side);
 
     sf::Font turn_text;
     turn_text.loadFromFile("Fonts/file.ttf");
@@ -846,7 +957,7 @@ int main()
     balance_gold_text_n.setString(std::to_string(townhall_nature.return_balance_gold()));
     sf::Vector2f p;
     int prev_i = 0;
-    int cnt_gold, cnt_etherium, cnt_pandorium;
+    int cnt_gold = 0, cnt_etherium = 0, cnt_pandorium = 0;
 
     int selectedEntityIndex = 1;
     while (window.isOpen())
@@ -875,6 +986,22 @@ int main()
                         }
                     }
 
+                    if (barracks_nature.return_d().getGlobalBounds().contains(mousePosition.x, mousePosition.y))
+                    {
+                        if (selected_team == 'n' && map[57].status == 'g')
+                            barracks_nature.buy(townhall_nature);
+                    }
+                    if (barracks_robot.return_d().getGlobalBounds().contains(mousePosition.x, mousePosition.y))
+                    {
+                        if (selected_team == 'r' && map[227].status == 'g')
+                            barracks_robot.buy(townhall_robot);
+                    }
+                    if (entities[selectedEntityIndex].return_drawing().getPosition().x > 1500)
+                    {
+                        if(selected_team=='n') 
+                            entities[selectedEntityIndex].buy_entity(townhall_nature);
+                        else entities[selectedEntityIndex].buy_entity(townhall_robot);
+                    }
 
                     if (button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
                     {
@@ -890,7 +1017,7 @@ int main()
                             selected_team = 'n';
                             selectedEntityIndex = 1;
                         }
-                        if (entities[selectedEntityIndex].return_tier() == 0 && (map[entities[selectedEntityIndex].return_i()].status != 'w'))
+                        if (entities[selectedEntityIndex].return_tier() == 0 && (map[entities[selectedEntityIndex].return_i()].status != 'w' && map[entities[selectedEntityIndex].return_i()].status != 'q' && map[entities[selectedEntityIndex].return_i()].status != 'y'))
                         {
                             if (selected_team == 'n' && cnt_n >= 2 && map[entities[selectedEntityIndex].return_i()].status != 'n')
                             {
@@ -970,19 +1097,9 @@ int main()
                             entities[i].turns_set_to();
                         }
 
-                        std::cout << map[148].status << ' ' << map[84].status << '\n';
+
                     }
-
-
-
-
-
                 }
-
-
-
-            entities[prev_i].spawn();
-
 
             if (selectedEntityIndex != -1)
             {
@@ -1071,20 +1188,19 @@ int main()
 
 
         build_map(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY, window);
+        instructions(window, button);
         townhall_nature.draw(window);
         townhall_robot.draw(window);
-        Hut barracks_nature(42, 'n', side);
+
         balance_g = townhall_nature.return_balance_gold();
-        //barracks_nature.buy(window, balance_g, clock);
-        Hut barracks_robot(210, 'r', side);
+        barracks_nature.spawn_barrack(window);
+
         balance_g = townhall_robot.return_balance_gold();
-        //barracks_robot.buy(window, balance_g, clock);
-        instructions(window, button);
+        barracks_robot.spawn_barrack(window);
         for (int i = 0; i < entities.size(); i++)
         {
             window.draw(entities[i].return_drawing());
         }
-
         window.draw(entities[selectedEntityIndex].return_drawing());
         window.draw(hider_n_g);
         window.draw(balance_gold_text_n);
