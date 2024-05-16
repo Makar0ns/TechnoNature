@@ -9,6 +9,7 @@ struct Tile
     float y;
     char status;
     char structure;
+    bool is_occupied = false; 
 };
 Tile map[tile_cnt];
 const int side = 35;
@@ -16,7 +17,10 @@ const int hor_space = side / 5 + 3, ver_space = side / 5;
 void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical, Tile map[])
 {
     for (int i = 0; i < tile_cnt; ++i)
+    {
         map[i].status = 'w';
+        map[i].is_occupied = false;
+    }
     for (int i = 0; i <= 15; ++i)
         for (int j = 4; j <= 9; ++j)
             map[j + i * 17].status = 'g';
@@ -544,7 +548,10 @@ public:
     }
     void attack()
     {
-        //if(map[i])
+        if (unit_tier > 0)
+        {
+            //if(map[])
+        }
     }
     void buy_entity(Townhall& townhall)
     {
@@ -585,43 +592,39 @@ public:
             townhall.change_balance_etherium(price_etherium);
             townhall.change_balance_etherium(price_pandorium);
             if (team == 'n')
+            {
                 unit.setPosition(map[57].x + horiz_shift, map[57].y + vert_shift);
-            else unit.setPosition(map[227].x + horiz_shift, map[227].y + vert_shift);
+                i = 57;
+            }
+            else
+            {
+                unit.setPosition(map[227].x + horiz_shift, map[227].y + vert_shift);
+                i = 227;
+            }
+        
         }
     }
     bool move_Z(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
     {
-        check = true;
-        sf::Vector2f position = entity.return_drawing().getPosition();
-        float distance = side * sqrt(3) - 3;
-        if (position.x - distance<left_border || position.y + distance >down_border) return false;
-        if (check)
-        {
+            sf::Vector2f position = entity.return_drawing().getPosition();
+            float distance = side * sqrt(3) - 3;
+            if (position.x - distance<left_border || position.y + distance >down_border)
+                return false;
             p = entity.return_drawing().getPosition();
             prev_i = entity.return_i();
             entity.return_drawing().move((sqrt(3) * side * cos(120.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(120.0f * 3.14159f / 180.0f)));
             if (abs(int(entity.return_drawing().getPosition().x - map[entity.return_i() + 1].x)) <= horiz_shift && abs(int(entity.return_drawing().getPosition().y - map[entity.return_i() + 1].y)) <= vert_shift)
                 entity.change(entity.return_i() + 1);
             else entity.change(entity.return_i() - 16);
-
-            if (map[entity.return_i()].status == 'w')
+            if (map[entity.return_i()].status == 'w' || map[entity.return_i()].is_occupied)
             {
                 entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
                 return false;
             }
-            for (int j = 0; j < entities.size(); j++)
-            {
-                if (entities[j].return_i() == entity.return_i())
-                {
-                    entity.return_drawing().setPosition(p);
-                    entity.change(prev_i);
-                    return false;
-                }
-            }
-        }
-        return true;
-
+            map[prev_i].is_occupied = false;
+            map[entity.return_i()].is_occupied = true;
+            return true;
     }
     bool move_X(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
     {
@@ -629,30 +632,20 @@ public:
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) - 3;
         if (position.x + distance > right_border || position.y + distance > down_border) return false;
-        if (check)
-        {
             p = entity.return_drawing().getPosition();
             prev_i = entity.return_i();
             entity.return_drawing().move((sqrt(3) * side * cos(60.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(60.0f * 3.14159f / 180.0f)));
             if (abs(int(map[entity.return_i() + 1].x - entity.return_drawing().getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() + 1].y - entity.return_drawing().getPosition().y) <= vert_shift))
                 entity.change(entity.return_i() + 1);
             else entity.change(entity.return_i() + 18);
-            if (map[entity.return_i()].status == 'w' )
+            if (map[entity.return_i()].status == 'w' || map[entity.return_i()].is_occupied)
             {
                 entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
                 return false;
             }
-            for (int j = 0; j < entities.size(); j++)
-            {
-                if (entities[j].return_i() == entity.return_i())
-                {
-                    entity.return_drawing().setPosition(p);
-                    entity.change(prev_i);
-                    return false;
-                }
-            }
-        }
+        map[prev_i].is_occupied = false;
+        map[i].is_occupied = true;
         return true;
     }
     bool move_D(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
@@ -662,28 +655,18 @@ public:
         float distance = side * sqrt(3) + 5;
         if (position.x + distance > right_border)
             return false;
-        if (check)
-        {
             p = entity.return_drawing().getPosition();
             prev_i = entity.return_i();
             entity.return_drawing().move((sqrt(3) * side * cos(0.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(0.0f * 3.14159f / 180.0f)));
             entity.change(entity.return_i() + 17);
-            if (map[entity.return_i()].status == 'w')
+            if (map[entity.return_i()].status == 'w' || map[entity.return_i()].is_occupied)
             {
                 entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
                 return false;
             }
-            for (int j = 0; j < entities.size(); j++)
-            {
-                if (entities[j].return_i() == entity.return_i())
-                {
-                    entity.return_drawing().setPosition(p);
-                    entity.change(prev_i);
-                    return false;
-                }
-            }
-        }
+        map[prev_i].is_occupied = false;
+        map[i].is_occupied = true;
         return true;
     }
     bool move_E(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
@@ -693,30 +676,20 @@ public:
         float distance = side * sqrt(3), vert_distance = side * sqrt(3) * 2;
         if (position.x + distance > right_border || position.y - vert_distance < upper_border)
             return false;
-        if (check)
-        {
             p = entity.return_drawing().getPosition();
             prev_i = entity.return_i();
             entity.return_drawing().move((sqrt(3) * side * cos(300.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(300.0f * 3.14159f / 180.0f)));
             if (abs(int(map[entity.return_i() - 1].x - entity.return_drawing().getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() - 1].y - entity.return_drawing().getPosition().y) <= vert_shift))
                 entity.change(entity.return_i() - 1);
             else entity.change(entity.return_i() + 16);
-            if (map[entity.return_i()].status == 'w')
+            if (map[entity.return_i()].status == 'w' || map[entity.return_i()].is_occupied)
             {
                 entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
                 return false;
             }
-            for (int j = 0; j < entities.size(); j++)
-            {
-                if (entities[j].return_i() == entity.return_i())
-                {
-                    entity.return_drawing().setPosition(p);
-                    entity.change(prev_i);
-                    return false;
-                }
-            }
-        }
+        map[prev_i].is_occupied = false;
+        map[i].is_occupied = true;
         return true;
     }
     bool move_W(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
@@ -726,30 +699,20 @@ public:
         float distance = side * sqrt(3), vert_distance = side * sqrt(3) * 2;
         if (position.x - distance < left_border || position.y - vert_distance < upper_border)
             return false;
-        if (check)
-        {
             p = entity.return_drawing().getPosition();
             prev_i = entity.return_i();
             entity.return_drawing().move((sqrt(3) * side * cos(240.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(240.0f * 3.14159f / 180.0f)));
             if (abs(int(map[entity.return_i() - 1].x - entity.return_drawing().getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() - 1].y - entity.return_drawing().getPosition().y) <= vert_shift))
                 entity.change(entity.return_i() - 1);
             else entity.change(entity.return_i() - 18);
-            if (map[entity.return_i()].status == 'w')
+            if (map[entity.return_i()].status == 'w' || map[entity.return_i()].is_occupied)
             {
                 entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
                 return false;
             }
-            for (int j = 0; j < entities.size(); j++)
-            {
-                if (entities[j].return_i() == entity.return_i())
-                {
-                    entity.return_drawing().setPosition(p);
-                    entity.change(prev_i);
-                    return false;
-                }
-            }
-        }
+        map[prev_i].is_occupied = false;
+        map[i].is_occupied = true;
         return true;
     }
     bool move_A(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
@@ -759,28 +722,18 @@ public:
         float distance = side * sqrt(3) * 1.5;
         if (position.x - distance < left_border)
             return false;
-        if (check)
-        {
             p = entity.return_drawing().getPosition();
             prev_i = entity.return_i();
             entity.return_drawing().move((sqrt(3) * side * cos(180.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(180.0f * 3.14159f / 180.0f)));
             entity.change(entity.return_i() - 17);
-            if (map[entity.return_i()].status == 'w')
+            if (map[entity.return_i()].status == 'w' || map[entity.return_i()].is_occupied)
             {
                 entity.return_drawing().setPosition(p);
                 entity.change(prev_i);
                 return false;
             }
-            for (int j = 0; j < entities.size(); j++)
-            {
-                if (entities[j].return_i() == entity.return_i())
-                {
-                    entity.return_drawing().setPosition(p);
-                    entity.change(prev_i);
-                    return false;
-                }
-            }
-        }
+        map[prev_i].is_occupied = false;
+        map[i].is_occupied = true;
         return true;
     }
 };
@@ -1135,11 +1088,16 @@ int main()
                         if (selected_team == 'r' && map[227].status == 'g' || map[227].status == 'r')
                             barracks_robot.buy(townhall_robot);
                     }
-                    if (entities[selectedEntityIndex].return_drawing().getPosition().x > 1500)
+                    if (entities[selectedEntityIndex].return_drawing().getPosition().x > 1500 && entities[selectedEntityIndex].return_drawing().getPosition().x < 1650)
                     {
                         if (selected_team == 'n')
                             entities[selectedEntityIndex].buy_entity(townhall_nature);
-                        else entities[selectedEntityIndex].buy_entity(townhall_robot);
+                        
+                    }
+                    if (entities[selectedEntityIndex].return_drawing().getPosition().x > 1650 )
+                    {
+                        if (selected_team == 'r')
+                            entities[selectedEntityIndex].buy_entity(townhall_robot);
                     }
 
                     if (button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
@@ -1267,7 +1225,7 @@ int main()
 
 
 
-                            if (entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex],entities))
+                            if (entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex], entities))
                                 entities[selectedEntityIndex].decrease_turns();
 
 
