@@ -440,7 +440,7 @@ private:
     int turns_left = 1;
     bool alive = true;
 public:
-    Entity(char in_team, int in_i, int unit_tier_in, int hp_in,int attack_in)
+    Entity(char in_team, int in_i, int unit_tier_in, int hp_in, int attack_in)
     {
         i = in_i;
         team = in_team;
@@ -556,93 +556,96 @@ public:
     {
         hp -= damage;
     }
-    void attack(std::vector <Entity> entities,int selectedentity)
+    void attack(std::vector <Entity> &entities, int selectedentity)
     {
-        int g=0;
+        int g = 0;
         if (unit_tier > 0)
         {
             if (entities[selectedentity].return_i() % 2 == 0)
             {
-                
-                if (map[entities[selectedentity].return_i() -17].is_occupied)
+
+                if (map[entities[selectedentity].return_i() - 18].is_occupied)
                 {
-                    while (entities[g].return_i() != entities[selectedentity].return_i() -17 && g < 13)
+                    while (entities[g].return_i() != entities[selectedentity].return_i() - 18 && g < 11)
                         g++;
-                    if (entities[g].return_team() != team && unit_tier != 3)
+                    if (entities[g].return_team() != team && unit_tier != 3 && g < 11)
                         entities[g].change_hp(attack_dmg);
-                    else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                    else if (unit_tier == 3 && g < 11) entities[g].change_hp(attack_dmg);
                     g = 0;
-                    std::cout << "penis1";
+
                 }
-                if (map[entities[selectedentity].return_i() -15].is_occupied)
+                if (map[entities[selectedentity].return_i() - 16].is_occupied)
                 {
-                    while (entities[g].return_i() != entities[selectedentity].return_i() -15 && g < 13)
+                    while (entities[g].return_i() != entities[selectedentity].return_i() - 16 && g < 11)
                         g++;
-                    if (entities[g].return_team() != team && unit_tier != 3)
+                    if (entities[g].return_team() != team && unit_tier != 3 && g < 11)
                         entities[g].change_hp(attack_dmg);
-                    else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                    else if (unit_tier == 3 && g < 11) entities[g].change_hp(attack_dmg);
                     g = 0;
                 }
 
             }
             else
             {
-                if (map[entities[selectedentity].return_i() + 15].is_occupied)
+                if (map[entities[selectedentity].return_i() + 16].is_occupied)
                 {
-                    while (entities[g].return_i() != entities[selectedentity].return_i() + 15 && g < 13)
+                    while (entities[g].return_i() != entities[selectedentity].return_i() + 16 && g < 11)
                         g++;
-                    if (entities[g].return_team() != team && unit_tier != 3)
+                    if (entities[g].return_team() != team && unit_tier != 3 && g < 11)
                         entities[g].change_hp(attack_dmg);
-                    else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                    else if (unit_tier == 3 && g < 11) entities[g].change_hp(attack_dmg);
                     g = 0;
                 }
-                if (map[entities[selectedentity].return_i() + 17].is_occupied)
+                if (map[entities[selectedentity].return_i() + 18].is_occupied)
                 {
-                    while (entities[g].return_i() != entities[selectedentity].return_i() + 17 && g < 13)
+                    while (entities[g].return_i() != entities[selectedentity].return_i() + 18 && g < 11)
                         g++;
-                    if (entities[g].return_team() != team && unit_tier != 3)
+                    if (entities[g].return_team() != team && unit_tier != 3 && g < 11)
                         entities[g].change_hp(attack_dmg);
-                    else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                    else if (unit_tier == 3 && g < 11) entities[g].change_hp(attack_dmg);
                     g = 0;
                 }
-                
+
             }
-            if (map[entities[selectedentity].return_i() + 16].is_occupied)
+            if (map[entities[selectedentity].return_i() + 17].is_occupied)
             {
-                while (entities[g].return_i() != entities[selectedentity].return_i() + 16 && g < 13)
+                while (entities[g].return_i() != entities[selectedentity].return_i() + 17 && g < 11)
                     g++;
-                if (entities[g].return_team() != team && unit_tier != 3)
+                if (entities[g].return_team() != team && unit_tier != 3 && g < 11)
                     entities[g].change_hp(attack_dmg);
-                else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                else if (unit_tier == 3 && g < 11) entities[g].change_hp(attack_dmg);
+                std::cout << entities[g].return_hp() << '\n';
                 g = 0;
-                std::cout << "penis2";
+
             }
-            if (map[entities[selectedentity].return_i() - 16].is_occupied)
+            if (map[entities[selectedentity].return_i() - 17].is_occupied)
             {
-                while (entities[g].return_i() != entities[selectedentity].return_i() - 16 && g < 13)
+                while (entities[g].return_i() != entities[selectedentity].return_i() - 17 && g < 11)
                     g++;
-                if (entities[g].return_team() != team && unit_tier != 3)
+                if (entities[g].return_team() != team && unit_tier != 3 && g < 11)
                     entities[g].change_hp(attack_dmg);
-                else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+
+                else if (unit_tier == 3 && g < 11) entities[g].change_hp(attack_dmg);
+                std::cout << entities[g].return_hp() << '\n';
                 g = 0;
-                std::cout << "penis3";
+
             }
             if (map[entities[selectedentity].return_i() + 1].is_occupied)
             {
-                while (entities[g].return_i() != entities[selectedentity].return_i() + 1 && g < 13)
+                while (entities[g].return_i() != entities[selectedentity].return_i() + 1 && g < 11)
                     g++;
-                if (entities[g].return_team() != team && unit_tier != 3)
+                if (entities[g].return_team() != team && unit_tier != 3 && g < 11)
                     entities[g].change_hp(attack_dmg);
-                else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                else if (unit_tier == 3 && g < 11) entities[g].change_hp(attack_dmg);
                 g = 0;
             }
             if (map[entities[selectedentity].return_i() - 1].is_occupied)
             {
-                while (entities[g].return_i() != entities[selectedentity].return_i() - 1 && g < 13)
+                while (entities[g].return_i() != entities[selectedentity].return_i() - 1 && g < 11)
                     g++;
-                if (entities[g].return_team() != team && unit_tier != 3)
+                if (entities[g].return_team() != team && unit_tier != 3 && g < 11)
                     entities[g].change_hp(attack_dmg);
-                else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                else if (unit_tier == 3 && g < 11) entities[g].change_hp(attack_dmg);
                 g = 0;
             }
         }
@@ -716,8 +719,12 @@ public:
             entity.change(prev_i);
             return false;
         }
+        std::cout << "Map[prev_i].is_occupied before: " << map[prev_i].is_occupied << std::endl;
         map[prev_i].is_occupied = false;
+        std::cout << "Map[prev_i].is_occupied after: " << map[prev_i].is_occupied << std::endl;
+        std::cout << "Map[current_i].is_occupied before: " << map[entity.return_i()].is_occupied << std::endl;
         map[entity.return_i()].is_occupied = true;
+        std::cout << "Map[current_i].is_occupied after: " << map[entity.return_i()].is_occupied << ' ' << entity.return_i() << std::endl;
         return true;
     }
     bool move_X(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
@@ -738,8 +745,12 @@ public:
             entity.change(prev_i);
             return false;
         }
+        std::cout << "Map[prev_i].is_occupied before: " << map[prev_i].is_occupied << std::endl;
         map[prev_i].is_occupied = false;
-        map[i].is_occupied = true;
+        std::cout << "Map[prev_i].is_occupied after: " << map[prev_i].is_occupied << std::endl;
+        std::cout << "Map[current_i].is_occupied before: " << map[entity.return_i()].is_occupied << std::endl;
+        map[entity.return_i()].is_occupied = true;
+        std::cout << "Map[current_i].is_occupied after: " << map[entity.return_i()].is_occupied << ' ' << entity.return_i() << std::endl;
         return true;
     }
     bool move_D(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
@@ -759,8 +770,12 @@ public:
             entity.change(prev_i);
             return false;
         }
+        std::cout << "Map[prev_i].is_occupied before: " << map[prev_i].is_occupied << std::endl;
         map[prev_i].is_occupied = false;
-        map[i].is_occupied = true;
+        std::cout << "Map[prev_i].is_occupied after: " << map[prev_i].is_occupied << std::endl;
+        std::cout << "Map[current_i].is_occupied before: " << map[entity.return_i()].is_occupied << std::endl;
+        map[entity.return_i()].is_occupied = true;
+        std::cout << "Map[current_i].is_occupied after: " << map[entity.return_i()].is_occupied << ' ' << entity.return_i() << std::endl;
         return true;
     }
     bool move_E(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
@@ -782,8 +797,12 @@ public:
             entity.change(prev_i);
             return false;
         }
+        std::cout << "Map[prev_i].is_occupied before: " << map[prev_i].is_occupied << std::endl;
         map[prev_i].is_occupied = false;
-        map[i].is_occupied = true;
+        std::cout << "Map[prev_i].is_occupied after: " << map[prev_i].is_occupied << std::endl;
+        std::cout << "Map[current_i].is_occupied before: " << map[entity.return_i()].is_occupied << std::endl;
+        map[entity.return_i()].is_occupied = true;
+        std::cout << "Map[current_i].is_occupied after: " << map[entity.return_i()].is_occupied << ' ' << entity.return_i() << std::endl;
         return true;
     }
     bool move_W(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
@@ -805,8 +824,12 @@ public:
             entity.change(prev_i);
             return false;
         }
+        std::cout << "Map[prev_i].is_occupied before: " << map[prev_i].is_occupied << std::endl;
         map[prev_i].is_occupied = false;
-        map[i].is_occupied = true;
+        std::cout << "Map[prev_i].is_occupied after: " << map[prev_i].is_occupied << std::endl;
+        std::cout << "Map[current_i].is_occupied before: " << map[entity.return_i()].is_occupied << std::endl;
+        map[entity.return_i()].is_occupied = true;
+        std::cout << "Map[current_i].is_occupied after: " << map[entity.return_i()].is_occupied << ' ' << entity.return_i() << std::endl;
         return true;
     }
     bool move_A(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
@@ -826,8 +849,12 @@ public:
             entity.change(prev_i);
             return false;
         }
+        std::cout << "Map[prev_i].is_occupied before: " << map[prev_i].is_occupied << std::endl;
         map[prev_i].is_occupied = false;
-        map[i].is_occupied = true;
+        std::cout << "Map[prev_i].is_occupied after: " << map[prev_i].is_occupied << std::endl;
+        std::cout << "Map[current_i].is_occupied before: " << map[entity.return_i()].is_occupied << std::endl;
+        map[entity.return_i()].is_occupied = true;
+        std::cout << "Map[current_i].is_occupied after: " << map[entity.return_i()].is_occupied << ' ' << entity.return_i() << std::endl;
         return true;
     }
 };
@@ -1021,18 +1048,18 @@ int main()
     create_map_coords(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY);
     sf::Sprite unit;
     std::vector <Entity> entities;
-    entities.push_back(Entity('r', 263, 0, 60,0));
-    entities.push_back(Entity('n', 25, 0, 60,0));
-    entities.push_back(Entity('n', 16, 1, 150,50));
-    entities.push_back(Entity('r', 16, 1, 150,50));
-    entities.push_back(Entity('n', 16, 2, 120,40));
-    entities.push_back(Entity('r', 16, 2, 120,40));
-    entities.push_back(Entity('n', 16, 3, 180,-50));
-    entities.push_back(Entity('r', 16, 3, 180,-50));
-    entities.push_back(Entity('n', 16, 4, 300,100));
-    entities.push_back(Entity('r', 16, 4, 300,100));
-    entities.push_back(Entity('n', 16, 5, 450,150));
-    entities.push_back(Entity('r', 16, 5, 450,150));
+    entities.push_back(Entity('r', 263, 0, 60, 0));
+    entities.push_back(Entity('n', 25, 0, 60, 0));
+    entities.push_back(Entity('n', 16, 1, 150, 50));
+    entities.push_back(Entity('r', 16, 1, 150, 50));
+    entities.push_back(Entity('n', 16, 2, 120, 40));
+    entities.push_back(Entity('r', 16, 2, 120, 40));
+    entities.push_back(Entity('n', 16, 3, 180, -50));
+    entities.push_back(Entity('r', 16, 3, 180, -50));
+    entities.push_back(Entity('n', 16, 4, 300, 100));
+    entities.push_back(Entity('r', 16, 4, 300, 100));
+    entities.push_back(Entity('n', 16, 5, 450, 150));
+    entities.push_back(Entity('r', 16, 5, 450, 150));
     for (int i = 0; i < entities.size(); i++)
     {
         entities[i].spawn();
@@ -1147,12 +1174,12 @@ int main()
     int selectedEntityIndex = 1;
     while (window.isOpen())
     {
+
         sf::Vector2i pos = sf::Mouse::getPosition(window);
         sf::Event event;
 
         while (window.pollEvent(event))
         {
-
             if (event.type == sf::Event::Closed)
                 window.close();
 
@@ -1183,7 +1210,7 @@ int main()
                     }
                     if (entities[selectedEntityIndex].return_drawing().getPosition().x > 1500 && entities[selectedEntityIndex].return_drawing().getPosition().x < 1650)
                     {
-                        if (selected_team == 'n' && map[57].status=='q')
+                        if (selected_team == 'n' && map[57].status == 'q')
                             entities[selectedEntityIndex].buy_entity(townhall_nature);
 
                     }
@@ -1285,8 +1312,15 @@ int main()
                         for (int i = 0; i < entities.size(); i++)
                         {
                             entities[i].turns_set_to();
-                            entities[i].attack(entities,i);
-                            if (entities[i].return_hp() < 0) std::cout << "peremoha";
+                            entities[i].attack(entities, i);
+                            if (entities[i].return_hp() <= 0)
+                            {
+                                if (entities[i].return_tier() == 0)
+                                {
+                                    entities[i].return_drawing().setPosition(2000, 1000);
+                                    entities[i].change(16);
+                                }
+                            }
                         }
 
 
