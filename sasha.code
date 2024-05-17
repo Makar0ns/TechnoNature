@@ -9,6 +9,7 @@ struct Tile
     float y;
     char status;
     char structure;
+    bool is_occupied = false;
 };
 Tile map[tile_cnt];
 const int side = 35;
@@ -16,7 +17,10 @@ const int hor_space = side / 5 + 3, ver_space = side / 5;
 void create_map(int numberOfHexagons_horizontal, int numberOfHexagons_vertical, Tile map[])
 {
     for (int i = 0; i < tile_cnt; ++i)
+    {
         map[i].status = 'w';
+        map[i].is_occupied = false;
+    }
     for (int i = 0; i <= 15; ++i)
         for (int j = 4; j <= 9; ++j)
             map[j + i * 17].status = 'g';
@@ -357,8 +361,6 @@ private:
     sf::Sprite hexagon;
     sf::Text text;
     sf::Font font;
-    sf::Sprite gold_stone;
-    sf::Texture gold;
 
 
 public:
@@ -399,27 +401,20 @@ public:
     void spawn_barrack(sf::RenderWindow& window)
     {
 
-        gold.loadFromFile("Images\\gold_stone.png");
-        gold_stone.setTexture(gold);
-        gold_stone.setScale(0.15, 0.15);
+
         if (team == 'n')
         {
             texture.loadFromFile("images/barracks_nature.png");
             hexagon.setPosition(1520, 100);
-
-            gold_stone.setPosition(1605, 113);
         }
         else
         {
             texture.loadFromFile("images/barracks_robot.png");
             hexagon.setPosition(1720, 100);
-
-            gold_stone.setPosition(1805, 113);
         }
         hexagon.setTexture(texture);
         hexagon.setScale(0.2, 0.2);
         window.draw(hexagon);
-        window.draw(gold_stone);
 
     }
     sf::Sprite return_d()
@@ -435,6 +430,7 @@ private:
     int unit_tier;
     int hp;
     int i_nature;
+    int attack_dmg;
     sf::Sprite unit;
     sf::Texture texture;
     sf::Texture grey;
@@ -442,13 +438,15 @@ private:
     sf::Vector2f p;
     bool check = true;
     int turns_left = 1;
+    bool alive = true;
 public:
-    Entity(char in_team, int in_i, int unit_tier_in, int hp_in)
+    Entity(char in_team, int in_i, int unit_tier_in, int hp_in,int attack_in)
     {
         i = in_i;
         team = in_team;
         unit_tier = unit_tier_in;
         hp = hp_in;
+        attack_dmg = attack_in;
     }
     void spawn()
     {
@@ -550,9 +548,108 @@ public:
     {
         return unit_tier;
     }
-    void buy_entity(Townhall &townhall)
+    int return_hp()
     {
-        int price_gold,price_etherium,price_pandorium;
+        return hp;
+    }
+    void change_hp(int damage)
+    {
+        hp -= damage;
+    }
+    void attack(std::vector <Entity> entities,int selectedentity)
+    {
+        int g=0;
+        if (unit_tier > 0)
+        {
+            if (entities[selectedentity].return_i() % 2 == 0)
+            {
+                
+                if (map[entities[selectedentity].return_i() -17].is_occupied)
+                {
+                    while (entities[g].return_i() != entities[selectedentity].return_i() -17 && g < 13)
+                        g++;
+                    if (entities[g].return_team() != team && unit_tier != 3)
+                        entities[g].change_hp(attack_dmg);
+                    else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                    g = 0;
+                    std::cout << "penis1";
+                }
+                if (map[entities[selectedentity].return_i() -15].is_occupied)
+                {
+                    while (entities[g].return_i() != entities[selectedentity].return_i() -15 && g < 13)
+                        g++;
+                    if (entities[g].return_team() != team && unit_tier != 3)
+                        entities[g].change_hp(attack_dmg);
+                    else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                    g = 0;
+                }
+
+            }
+            else
+            {
+                if (map[entities[selectedentity].return_i() + 15].is_occupied)
+                {
+                    while (entities[g].return_i() != entities[selectedentity].return_i() + 15 && g < 13)
+                        g++;
+                    if (entities[g].return_team() != team && unit_tier != 3)
+                        entities[g].change_hp(attack_dmg);
+                    else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                    g = 0;
+                }
+                if (map[entities[selectedentity].return_i() + 17].is_occupied)
+                {
+                    while (entities[g].return_i() != entities[selectedentity].return_i() + 17 && g < 13)
+                        g++;
+                    if (entities[g].return_team() != team && unit_tier != 3)
+                        entities[g].change_hp(attack_dmg);
+                    else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                    g = 0;
+                }
+                
+            }
+            if (map[entities[selectedentity].return_i() + 16].is_occupied)
+            {
+                while (entities[g].return_i() != entities[selectedentity].return_i() + 16 && g < 13)
+                    g++;
+                if (entities[g].return_team() != team && unit_tier != 3)
+                    entities[g].change_hp(attack_dmg);
+                else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                g = 0;
+                std::cout << "penis2";
+            }
+            if (map[entities[selectedentity].return_i() - 16].is_occupied)
+            {
+                while (entities[g].return_i() != entities[selectedentity].return_i() - 16 && g < 13)
+                    g++;
+                if (entities[g].return_team() != team && unit_tier != 3)
+                    entities[g].change_hp(attack_dmg);
+                else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                g = 0;
+                std::cout << "penis3";
+            }
+            if (map[entities[selectedentity].return_i() + 1].is_occupied)
+            {
+                while (entities[g].return_i() != entities[selectedentity].return_i() + 1 && g < 13)
+                    g++;
+                if (entities[g].return_team() != team && unit_tier != 3)
+                    entities[g].change_hp(attack_dmg);
+                else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                g = 0;
+            }
+            if (map[entities[selectedentity].return_i() - 1].is_occupied)
+            {
+                while (entities[g].return_i() != entities[selectedentity].return_i() - 1 && g < 13)
+                    g++;
+                if (entities[g].return_team() != team && unit_tier != 3)
+                    entities[g].change_hp(attack_dmg);
+                else if (unit_tier == 3) entities[g].change_hp(attack_dmg);
+                g = 0;
+            }
+        }
+    }
+    void buy_entity(Townhall& townhall)
+    {
+        int price_gold, price_etherium, price_pandorium;
         if (unit_tier == 1)
         {
             price_gold = 10;
@@ -589,149 +686,148 @@ public:
             townhall.change_balance_etherium(price_etherium);
             townhall.change_balance_etherium(price_pandorium);
             if (team == 'n')
-                unit.setPosition(map[57].x, map[57].y);
-            else unit.setPosition(map[227].x, map[227].y);
+            {
+                unit.setPosition(map[57].x + horiz_shift, map[57].y + vert_shift);
+                i = 57;
+            }
+            else
+            {
+                unit.setPosition(map[227].x + horiz_shift, map[227].y + vert_shift);
+                i = 227;
+            }
+
         }
     }
-    bool move_Z(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
+    bool move_Z(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
     {
-        check = true;
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) - 3;
-        if (position.x - distance<left_border || position.y + distance >down_border) return false;
-        if (check)
+        if (position.x - distance<left_border || position.y + distance >down_border)
+            return false;
+        p = entity.return_drawing().getPosition();
+        prev_i = entity.return_i();
+        entity.return_drawing().move((sqrt(3) * side * cos(120.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(120.0f * 3.14159f / 180.0f)));
+        if (abs(int(entity.return_drawing().getPosition().x - map[entity.return_i() + 1].x)) <= horiz_shift && abs(int(entity.return_drawing().getPosition().y - map[entity.return_i() + 1].y)) <= vert_shift)
+            entity.change(entity.return_i() + 1);
+        else entity.change(entity.return_i() - 16);
+        if (map[entity.return_i()].status == 'w' || map[entity.return_i()].is_occupied)
         {
-            p = entity.return_drawing().getPosition();
-            prev_i = entity.return_i();
-            entity.return_drawing().move((sqrt(3) * side * cos(120.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(120.0f * 3.14159f / 180.0f)));
-            if (abs(int(entity.return_drawing().getPosition().x - map[entity.return_i() + 1].x)) <= horiz_shift && abs(int(entity.return_drawing().getPosition().y - map[entity.return_i() + 1].y)) <= vert_shift)
-                entity.change(entity.return_i() + 1);
-            else entity.change(entity.return_i() - 16);
-
-            if (map[entity.return_i()].status == 'w')
-            {
-                entity.return_drawing().setPosition(p);
-                entity.change(prev_i);
-                return false;
-
-            }
+            entity.return_drawing().setPosition(p);
+            entity.change(prev_i);
+            return false;
         }
+        map[prev_i].is_occupied = false;
+        map[entity.return_i()].is_occupied = true;
         return true;
-
     }
-    bool move_X(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
+    bool move_X(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
     {
         check = true;
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) - 3;
         if (position.x + distance > right_border || position.y + distance > down_border) return false;
-        if (check)
+        p = entity.return_drawing().getPosition();
+        prev_i = entity.return_i();
+        entity.return_drawing().move((sqrt(3) * side * cos(60.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(60.0f * 3.14159f / 180.0f)));
+        if (abs(int(map[entity.return_i() + 1].x - entity.return_drawing().getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() + 1].y - entity.return_drawing().getPosition().y) <= vert_shift))
+            entity.change(entity.return_i() + 1);
+        else entity.change(entity.return_i() + 18);
+        if (map[entity.return_i()].status == 'w' || map[entity.return_i()].is_occupied)
         {
-            p = entity.return_drawing().getPosition();
-            prev_i = entity.return_i();
-            entity.return_drawing().move((sqrt(3) * side * cos(60.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(60.0f * 3.14159f / 180.0f)));
-            if (abs(int(map[entity.return_i() + 1].x - entity.return_drawing().getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() + 1].y - entity.return_drawing().getPosition().y) <= vert_shift))
-                entity.change(entity.return_i() + 1);
-            else entity.change(entity.return_i() + 18);
-            if (map[entity.return_i()].status == 'w')
-            {
-                entity.return_drawing().setPosition(p);
-                entity.change(prev_i);
-                return false;
-            }
+            entity.return_drawing().setPosition(p);
+            entity.change(prev_i);
+            return false;
         }
+        map[prev_i].is_occupied = false;
+        map[i].is_occupied = true;
         return true;
     }
-    bool move_D(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
+    bool move_D(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
     {
         check = true;
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) + 5;
         if (position.x + distance > right_border)
             return false;
-        if (check)
+        p = entity.return_drawing().getPosition();
+        prev_i = entity.return_i();
+        entity.return_drawing().move((sqrt(3) * side * cos(0.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(0.0f * 3.14159f / 180.0f)));
+        entity.change(entity.return_i() + 17);
+        if (map[entity.return_i()].status == 'w' || map[entity.return_i()].is_occupied)
         {
-            p = entity.return_drawing().getPosition();
-            prev_i = entity.return_i();
-            entity.return_drawing().move((sqrt(3) * side * cos(0.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(0.0f * 3.14159f / 180.0f)));
-            entity.change(entity.return_i() + 17);
-            if (map[entity.return_i()].status == 'w')
-            {
-                entity.return_drawing().setPosition(p);
-                entity.change(prev_i);
-                return false;
-            }
+            entity.return_drawing().setPosition(p);
+            entity.change(prev_i);
+            return false;
         }
+        map[prev_i].is_occupied = false;
+        map[i].is_occupied = true;
         return true;
     }
-    bool move_E(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
+    bool move_E(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
     {
         check = true;
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3), vert_distance = side * sqrt(3) * 2;
         if (position.x + distance > right_border || position.y - vert_distance < upper_border)
             return false;
-        if (check)
+        p = entity.return_drawing().getPosition();
+        prev_i = entity.return_i();
+        entity.return_drawing().move((sqrt(3) * side * cos(300.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(300.0f * 3.14159f / 180.0f)));
+        if (abs(int(map[entity.return_i() - 1].x - entity.return_drawing().getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() - 1].y - entity.return_drawing().getPosition().y) <= vert_shift))
+            entity.change(entity.return_i() - 1);
+        else entity.change(entity.return_i() + 16);
+        if (map[entity.return_i()].status == 'w' || map[entity.return_i()].is_occupied)
         {
-            p = entity.return_drawing().getPosition();
-            prev_i = entity.return_i();
-            entity.return_drawing().move((sqrt(3) * side * cos(300.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(300.0f * 3.14159f / 180.0f)));
-            if (abs(int(map[entity.return_i() - 1].x - entity.return_drawing().getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() - 1].y - entity.return_drawing().getPosition().y) <= vert_shift))
-                entity.change(entity.return_i() - 1);
-            else entity.change(entity.return_i() + 16);
-            if (map[entity.return_i()].status == 'w')
-            {
-                entity.return_drawing().setPosition(p);
-                entity.change(prev_i);
-                return false;
-            }
+            entity.return_drawing().setPosition(p);
+            entity.change(prev_i);
+            return false;
         }
+        map[prev_i].is_occupied = false;
+        map[i].is_occupied = true;
         return true;
     }
-    bool move_W(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
+    bool move_W(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
     {
         check = true;
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3), vert_distance = side * sqrt(3) * 2;
         if (position.x - distance < left_border || position.y - vert_distance < upper_border)
             return false;
-        if (check)
+        p = entity.return_drawing().getPosition();
+        prev_i = entity.return_i();
+        entity.return_drawing().move((sqrt(3) * side * cos(240.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(240.0f * 3.14159f / 180.0f)));
+        if (abs(int(map[entity.return_i() - 1].x - entity.return_drawing().getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() - 1].y - entity.return_drawing().getPosition().y) <= vert_shift))
+            entity.change(entity.return_i() - 1);
+        else entity.change(entity.return_i() - 18);
+        if (map[entity.return_i()].status == 'w' || map[entity.return_i()].is_occupied)
         {
-            p = entity.return_drawing().getPosition();
-            prev_i = entity.return_i();
-            entity.return_drawing().move((sqrt(3) * side * cos(240.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(240.0f * 3.14159f / 180.0f)));
-            if (abs(int(map[entity.return_i() - 1].x - entity.return_drawing().getPosition().x)) <= horiz_shift && abs(int(map[entity.return_i() - 1].y - entity.return_drawing().getPosition().y) <= vert_shift))
-                entity.change(entity.return_i() - 1);
-            else entity.change(entity.return_i() - 18);
-            if (map[entity.return_i()].status == 'w')
-            {
-                entity.return_drawing().setPosition(p);
-                entity.change(prev_i);
-                return false;
-            }
+            entity.return_drawing().setPosition(p);
+            entity.change(prev_i);
+            return false;
         }
+        map[prev_i].is_occupied = false;
+        map[i].is_occupied = true;
         return true;
     }
-    bool move_A(float left_border, float right_border, float upper_border, float down_border, Entity& entity)
+    bool move_A(float left_border, float right_border, float upper_border, float down_border, Entity& entity, std::vector <Entity> entities)
     {
         check = true;
         sf::Vector2f position = entity.return_drawing().getPosition();
         float distance = side * sqrt(3) * 1.5;
         if (position.x - distance < left_border)
             return false;
-        if (check)
+        p = entity.return_drawing().getPosition();
+        prev_i = entity.return_i();
+        entity.return_drawing().move((sqrt(3) * side * cos(180.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(180.0f * 3.14159f / 180.0f)));
+        entity.change(entity.return_i() - 17);
+        if (map[entity.return_i()].status == 'w' || map[entity.return_i()].is_occupied)
         {
-            p = entity.return_drawing().getPosition();
-            prev_i = entity.return_i();
-            entity.return_drawing().move((sqrt(3) * side * cos(180.0f * 3.14159f / 180.0f)), (sqrt(3) * side * sin(180.0f * 3.14159f / 180.0f)));
-            entity.change(entity.return_i() - 17);
-            if (map[entity.return_i()].status == 'w')
-            {
-                entity.return_drawing().setPosition(p);
-                entity.change(prev_i);
-                return false;
-            }
+            entity.return_drawing().setPosition(p);
+            entity.change(prev_i);
+            return false;
         }
+        map[prev_i].is_occupied = false;
+        map[i].is_occupied = true;
         return true;
     }
 };
@@ -749,14 +845,53 @@ void instructions(sf::RenderWindow& window, sf::Sprite& button)
     sf::Text text4;
     sf::Text text5;
     sf::Text text6;
-    sf::Text text7;
-    sf::Text text8;
     sf::Font font;
+    sf::Sprite gold_stone1;
+    sf::Sprite gold_stone1_text;
+    sf::Sprite gold_stone2;
+    sf::Sprite gold_stone2_text;
+    sf::Sprite etherium_stone1;
+    sf::Sprite etherium_stone1_text;
+    sf::Sprite etherium_stone2;
+    sf::Sprite etherium_stone2_text;
+    sf::Sprite etherium_stone3;
+    sf::Sprite etherium_stone3_text;
+    sf::Sprite etherium_stone4;
+    sf::Sprite etherium_stone4_text;
+    sf::Sprite pandorium_stone1;
+    sf::Sprite pandorium_stone1_text;
+    sf::Sprite pandorium_stone2;
+    sf::Sprite pandorium_stone2_text;
+    sf::Texture gold;
+    sf::Texture etherium;
+    sf::Texture pandorium;
+    sf::Texture gold_10;
+    sf::Texture gold_20;
+    sf::Texture etherium_5;
+    sf::Texture etherium_8;
+    sf::Texture etherium_12;
+    sf::Texture etherium_15;
+    sf::Texture pandorium_3;
+    sf::Texture pandorium_10;
+    gold_20.loadFromFile("Images\\20_gold.png");
+    gold_10.loadFromFile("Images\\10_gold.png");
+    etherium_5.loadFromFile("Images\\5_red.png");
+    etherium_8.loadFromFile("Images\\8_red.png");
+    etherium_12.loadFromFile("Images\\12_red.png");
+    etherium_15.loadFromFile("Images\\15_red.png");
+    gold.loadFromFile("Images\\gold_stone.png");
+    gold_stone1_text.setTexture(gold_20);
+    gold_stone2_text.setTexture(gold_10);
+    etherium.loadFromFile("Images\\etherium_stone.png");
+    pandorium.loadFromFile("Images\\pandorium_stone.png");
+    pandorium_3.loadFromFile("Images\\3_lav.png");
+    pandorium_10.loadFromFile("Images\\10_lav.png");
     sf::RectangleShape menu(sf::Vector2f(400, 600));
     menu.setFillColor(sf::Color::Black);
     menu.setPosition(1440, 73);
     menu.setOutlineThickness(10.f);
     menu.setOutlineColor(sf::Color(216, 178, 129));
+    window.draw(menu);
     font.loadFromFile("Fonts/file.ttf");
     text1.setFont(font);
     text1.setCharacterSize(18);
@@ -794,19 +929,70 @@ void instructions(sf::RenderWindow& window, sf::Sprite& button)
     text6.setFillColor(sf::Color::White);
     text6.move(1600, 850);
     window.draw(text6);
-    text7.setFont(font);
-    text7.setCharacterSize(18);
-    text7.setString("10");
-    text7.setFillColor(sf::Color::Yellow);
-    text7.move(1580, 115);
-    window.draw(text7);
-    text8.setFont(font);
-    text8.setCharacterSize(18);
-    text8.setString("10");
-    text8.setFillColor(sf::Color::Yellow);
-    text8.move(1780, 115);
-    window.draw(text8);
-    window.draw(menu);
+    gold_stone1.setTexture(gold);
+    gold_stone1.setScale(0.15, 0.15);
+    gold_stone1.setPosition(1660, 115);
+    gold_stone2.setTexture(gold);
+    gold_stone2.setScale(0.15, 0.15);
+    gold_stone2.setPosition(1660, 185);
+    etherium_stone1.setTexture(etherium);
+    etherium_stone1.setScale(0.10, 0.10);
+    etherium_stone1.setPosition(1660, 255);
+    etherium_stone2.setTexture(etherium);
+    etherium_stone2.setScale(0.10, 0.10);
+    etherium_stone2.setPosition(1660, 325);
+    etherium_stone3.setTexture(etherium);
+    etherium_stone3.setScale(0.10, 0.10);
+    etherium_stone3.setPosition(1630, 395);
+    etherium_stone4.setTexture(etherium);
+    etherium_stone4.setScale(0.10, 0.10);
+    etherium_stone4.setPosition(1630, 465);
+    pandorium_stone1.setTexture(pandorium);
+    pandorium_stone1.setScale(0.10, 0.10);
+    pandorium_stone1.setPosition(1690, 395);
+    pandorium_stone1_text.setTexture(pandorium_3);
+    pandorium_stone1_text.setScale(0.4, 0.4);
+    pandorium_stone1_text.setPosition(1620, 355);
+    pandorium_stone2.setTexture(pandorium);
+    pandorium_stone2.setScale(0.10, 0.10);
+    pandorium_stone2.setPosition(1690, 465);
+    pandorium_stone2_text.setTexture(pandorium_10);
+    pandorium_stone2_text.setScale(0.4, 0.4);
+    pandorium_stone2_text.setPosition(1620, 425);
+    gold_stone1_text.setScale(0.4, 0.4);
+    gold_stone1_text.setPosition(1580, 75);
+    gold_stone2_text.setScale(0.4, 0.4);
+    gold_stone2_text.setPosition(1580, 145);
+    etherium_stone1_text.setTexture(etherium_5);
+    etherium_stone1_text.setScale(0.4, 0.4);
+    etherium_stone1_text.setPosition(1580, 215);
+    etherium_stone2_text.setTexture(etherium_8);
+    etherium_stone2_text.setScale(0.4, 0.4);
+    etherium_stone2_text.setPosition(1580, 285);
+    etherium_stone3_text.setTexture(etherium_12);
+    etherium_stone3_text.setScale(0.4, 0.4);
+    etherium_stone3_text.setPosition(1560, 355);
+    etherium_stone4_text.setTexture(etherium_15);
+    etherium_stone4_text.setScale(0.4, 0.4);
+    etherium_stone4_text.setPosition(1560, 425);
+    window.draw(gold_stone1_text);
+    window.draw(gold_stone2_text);
+    window.draw(gold_stone1);
+    window.draw(gold_stone2);
+    window.draw(etherium_stone1);
+    window.draw(etherium_stone1_text);
+    window.draw(etherium_stone2);
+    window.draw(etherium_stone2_text);
+    window.draw(etherium_stone3);
+    window.draw(etherium_stone3_text);
+    window.draw(etherium_stone4);
+    window.draw(etherium_stone4_text);
+    window.draw(pandorium_stone1);
+    window.draw(pandorium_stone1_text);
+    window.draw(pandorium_stone2);
+    window.draw(pandorium_stone2_text);
+
+
 }
 
 int main()
@@ -835,18 +1021,18 @@ int main()
     create_map_coords(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY);
     sf::Sprite unit;
     std::vector <Entity> entities;
-    entities.push_back(Entity('r', 263, 0, 60));
-    entities.push_back(Entity('n', 25, 0, 60));
-    entities.push_back(Entity('n', 40, 1, 150));
-    entities.push_back(Entity('r', 260, 1, 150));
-    entities.push_back(Entity('n', 41, 2, 120));
-    entities.push_back(Entity('r', 261, 2, 120));
-    entities.push_back(Entity('n', 42, 3, 180));
-    entities.push_back(Entity('r', 262, 3, 180));
-    entities.push_back(Entity('n', 43, 4, 300));
-    entities.push_back(Entity('r', 264, 4, 300));
-    entities.push_back(Entity('n', 39, 5, 450));
-    entities.push_back(Entity('r', 259, 5, 450));
+    entities.push_back(Entity('r', 263, 0, 60,0));
+    entities.push_back(Entity('n', 25, 0, 60,0));
+    entities.push_back(Entity('n', 16, 1, 150,50));
+    entities.push_back(Entity('r', 16, 1, 150,50));
+    entities.push_back(Entity('n', 16, 2, 120,40));
+    entities.push_back(Entity('r', 16, 2, 120,40));
+    entities.push_back(Entity('n', 16, 3, 180,-50));
+    entities.push_back(Entity('r', 16, 3, 180,-50));
+    entities.push_back(Entity('n', 16, 4, 300,100));
+    entities.push_back(Entity('r', 16, 4, 300,100));
+    entities.push_back(Entity('n', 16, 5, 450,150));
+    entities.push_back(Entity('r', 16, 5, 450,150));
     for (int i = 0; i < entities.size(); i++)
     {
         entities[i].spawn();
@@ -958,7 +1144,6 @@ int main()
     sf::Vector2f p;
     int prev_i = 0;
     int cnt_gold = 0, cnt_etherium = 0, cnt_pandorium = 0;
-
     int selectedEntityIndex = 1;
     while (window.isOpen())
     {
@@ -988,19 +1173,24 @@ int main()
 
                     if (barracks_nature.return_d().getGlobalBounds().contains(mousePosition.x, mousePosition.y))
                     {
-                        if (selected_team == 'n' && map[57].status == 'g')
+                        if (selected_team == 'n' && map[57].status == 'g' || map[57].status == 'n')
                             barracks_nature.buy(townhall_nature);
                     }
                     if (barracks_robot.return_d().getGlobalBounds().contains(mousePosition.x, mousePosition.y))
                     {
-                        if (selected_team == 'r' && map[227].status == 'g')
+                        if (selected_team == 'r' && map[227].status == 'g' || map[227].status == 'r')
                             barracks_robot.buy(townhall_robot);
                     }
-                    if (entities[selectedEntityIndex].return_drawing().getPosition().x > 1500)
+                    if (entities[selectedEntityIndex].return_drawing().getPosition().x > 1500 && entities[selectedEntityIndex].return_drawing().getPosition().x < 1650)
                     {
-                        if(selected_team=='n') 
+                        if (selected_team == 'n' && map[57].status=='q')
                             entities[selectedEntityIndex].buy_entity(townhall_nature);
-                        else entities[selectedEntityIndex].buy_entity(townhall_robot);
+
+                    }
+                    if (entities[selectedEntityIndex].return_drawing().getPosition().x > 1650)
+                    {
+                        if (selected_team == 'r' && map[227].status == 'y')
+                            entities[selectedEntityIndex].buy_entity(townhall_robot);
                     }
 
                     if (button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
@@ -1095,6 +1285,8 @@ int main()
                         for (int i = 0; i < entities.size(); i++)
                         {
                             entities[i].turns_set_to();
+                            entities[i].attack(entities,i);
+                            if (entities[i].return_hp() < 0) std::cout << "peremoha";
                         }
 
 
@@ -1128,7 +1320,7 @@ int main()
 
 
 
-                            if (entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]))
+                            if (entities[selectedEntityIndex].move_Z(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex], entities))
                                 entities[selectedEntityIndex].decrease_turns();
 
 
@@ -1137,7 +1329,7 @@ int main()
                         {
 
 
-                            if (entities[selectedEntityIndex].move_X(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]))
+                            if (entities[selectedEntityIndex].move_X(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex], entities))
                                 entities[selectedEntityIndex].decrease_turns();
 
                         }
@@ -1145,7 +1337,7 @@ int main()
                         {
 
 
-                            if (entities[selectedEntityIndex].move_A(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]))
+                            if (entities[selectedEntityIndex].move_A(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex], entities))
                                 entities[selectedEntityIndex].decrease_turns();
 
                         }
@@ -1153,7 +1345,7 @@ int main()
                         {
 
 
-                            if (entities[selectedEntityIndex].move_W(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]))
+                            if (entities[selectedEntityIndex].move_W(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex], entities))
                                 entities[selectedEntityIndex].decrease_turns();
 
                         }
@@ -1161,7 +1353,7 @@ int main()
                         {
 
 
-                            if (entities[selectedEntityIndex].move_E(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]))
+                            if (entities[selectedEntityIndex].move_E(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex], entities))
                                 entities[selectedEntityIndex].decrease_turns();
 
                         }
@@ -1169,7 +1361,7 @@ int main()
                         {
 
 
-                            if (entities[selectedEntityIndex].move_D(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex]))
+                            if (entities[selectedEntityIndex].move_D(left_border, right_border, upper_border, down_border, entities[selectedEntityIndex], entities))
                                 entities[selectedEntityIndex].decrease_turns();
 
 
