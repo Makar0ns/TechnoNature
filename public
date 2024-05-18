@@ -748,6 +748,7 @@ public:
                 }
                 g = 0;
             }
+            
         }
     }
     void buy_entity(Townhall& townhall)
@@ -960,18 +961,14 @@ public:
 };
 void instructions(sf::RenderWindow& window, sf::Sprite& button)
 {
-    sf::Texture button_texture;
-    button_texture.loadFromFile("images/end_turn.png");
-    button.setTexture(button_texture);
-    button.setScale(0.4, 0.4);
-    button.setPosition(1430, 700);
-    window.draw(button);
+    
     sf::Text text1;
     sf::Text text2;
     sf::Text text3;
     sf::Text text4;
     sf::Text text5;
     sf::Text text6;
+    sf::Text text7;
     sf::Font font;
     sf::Sprite gold_stone1;
     sf::Sprite gold_stone1_text;
@@ -989,6 +986,8 @@ void instructions(sf::RenderWindow& window, sf::Sprite& button)
     sf::Sprite pandorium_stone1_text;
     sf::Sprite pandorium_stone2;
     sf::Sprite pandorium_stone2_text;
+    sf::Sprite shop1;
+    sf::Texture shop;
     sf::Texture gold;
     sf::Texture etherium;
     sf::Texture pandorium;
@@ -1007,6 +1006,7 @@ void instructions(sf::RenderWindow& window, sf::Sprite& button)
     etherium_12.loadFromFile("Images\\12_red.png");
     etherium_15.loadFromFile("Images\\15_red.png");
     gold.loadFromFile("Images\\gold_stone.png");
+    shop.loadFromFile("Images\\shop.png");
     gold_stone1_text.setTexture(gold_20);
     gold_stone2_text.setTexture(gold_10);
     etherium.loadFromFile("Images\\etherium_stone.png");
@@ -1056,6 +1056,15 @@ void instructions(sf::RenderWindow& window, sf::Sprite& button)
     text6.setFillColor(sf::Color::White);
     text6.move(1600, 850);
     window.draw(text6);
+    text7.setFont(font);
+    text7.setCharacterSize(18);
+    text7.setString("Space - end turn");
+    text7.setFillColor(sf::Color::White);
+    text7.move(1600, 880);
+    window.draw(text7);
+    shop1.setTexture(shop);
+    shop1.setScale(1.7,1.7);
+    shop1.setPosition(1480, 450);
     gold_stone1.setTexture(gold);
     gold_stone1.setScale(0.15, 0.15);
     gold_stone1.setPosition(1660, 115);
@@ -1118,6 +1127,7 @@ void instructions(sf::RenderWindow& window, sf::Sprite& button)
     window.draw(pandorium_stone1_text);
     window.draw(pandorium_stone2);
     window.draw(pandorium_stone2_text);
+    window.draw(shop1);
 
 
 }
@@ -1186,7 +1196,9 @@ int main()
     Townhall townhall_robot(263, 'r', side);
     Hut barracks_nature(57, 'n', side);
     Hut barracks_robot(227, 'r', side);
-
+    sf::RectangleShape hider(sf::Vector2f(2000, 2000));
+    hider.setFillColor(sf::Color::Black);
+    hider.setPosition(0, 0);
     sf::Font turn_text;
     turn_text.loadFromFile("Fonts/file.ttf");
     sf::Text turn_t;
@@ -1199,7 +1211,18 @@ int main()
     sf::RectangleShape hider_turn(sf::Vector2f(300, 50));
     hider_turn.setFillColor(sf::Color::Black);
     hider_turn.setPosition(800, 20);
-
+    sf::Sprite nature_win;
+    sf::Sprite robot_win;
+    sf::Texture r_win;
+    sf::Texture n_win;
+    r_win.loadFromFile("Images\\techno_won.png");
+    n_win.loadFromFile("Images\\nature_won.png");
+    nature_win.setTexture(n_win);
+    robot_win.setTexture(r_win);
+    nature_win.setScale(3, 3);
+    robot_win.setScale(3, 3);
+    robot_win.setPosition(580, 100);
+    nature_win.setPosition(580, 100);
 
     sf::Sprite gold_stone;
     sf::Texture gold;
@@ -1272,7 +1295,8 @@ int main()
     int prev_i = 0;
     int cnt_gold = 0, cnt_etherium = 0, cnt_pandorium = 0;
     int selectedEntityIndex = 1;
-    while (window.isOpen())
+   
+    while (window.isOpen() )
     {
 
         sf::Vector2i pos = sf::Mouse::getPosition(window);
@@ -1280,6 +1304,7 @@ int main()
 
         while (window.pollEvent(event))
         {
+            
             if (event.type == sf::Event::Closed)
                 window.close();
 
@@ -1320,157 +1345,155 @@ int main()
                             entities[selectedEntityIndex].buy_entity(townhall_robot);
                     }
 
-                    if (button.getGlobalBounds().contains(mousePosition.x, mousePosition.y))
+
+                }
+            if (event.type == sf::Event::KeyPressed)
+                if (event.key.code == sf::Keyboard::Space)
+                {
+                    turn_cnt++;
+                    if (turn_cnt % 2 == 0)
+                    {
+                        selected_team = 'r';
+                        selectedEntityIndex = 0;
+                    }
+                    else
+                    {
+                        selected_team = 'n';
+                        selectedEntityIndex = 1;
+                    }
+                    if (entities[selectedEntityIndex].return_tier() == 0 && (map[entities[selectedEntityIndex].return_i()].status != 'w' && map[entities[selectedEntityIndex].return_i()].status != 'q' && map[entities[selectedEntityIndex].return_i()].status != 'y'))
+                    {
+                        if (selected_team == 'n' && cnt_n >= 2 && map[entities[selectedEntityIndex].return_i()].status != 'n')
+                        {
+                            capturing_n = true;
+                            cnt_n = 0;
+                        }
+                        else if (selected_team == 'r' && cnt_r >= 2 && map[entities[selectedEntityIndex].return_i()].status != 'r')
+                        {
+                            capturing_r = true;
+                            cnt_r = 0;
+                        }
+                    }
+
+
+                    if (selected_team == 'n')
                     {
 
-                        turn_cnt++;
-                        if (turn_cnt % 2 == 0)
-                        {
-                            selected_team = 'r';
-                            selectedEntityIndex = 0;
-                        }
-                        else
-                        {
-                            selected_team = 'n';
-                            selectedEntityIndex = 1;
-                        }
-                        if (entities[selectedEntityIndex].return_tier() == 0 && (map[entities[selectedEntityIndex].return_i()].status != 'w' && map[entities[selectedEntityIndex].return_i()].status != 'q' && map[entities[selectedEntityIndex].return_i()].status != 'y'))
-                        {
-                            if (selected_team == 'n' && cnt_n >= 2 && map[entities[selectedEntityIndex].return_i()].status != 'n')
-                            {
-                                capturing_n = true;
-                                cnt_n = 0;
-                            }
-                            else if (selected_team == 'r' && cnt_r >= 2 && map[entities[selectedEntityIndex].return_i()].status != 'r')
-                            {
-                                capturing_r = true;
-                                cnt_r = 0;
-                            }
-                        }
-
-
-                        if (selected_team == 'n')
-                        {
-
-                            cnt_n++;
-                            turn_t.setString("Nature's turn");
-                            if (map[19].status == 'l') cnt_gold++;
-                            if (map[257].status == 'l') cnt_gold++;
-                            townhall_nature.update_gold(cnt_gold);
-                            if (map[84].status == 'l') cnt_etherium++;
-                            if (map[220].status == 'l') cnt_etherium++;
-                            townhall_nature.update_etherium(cnt_etherium);
-                            if (map[148].status == 'l') cnt_pandorium++;
-                            townhall_nature.update_pandorium(cnt_pandorium);
-                            balance_gold_text_n.setString(std::to_string(townhall_nature.return_balance_gold()));
-                            balance_etherium_text_n.setString(std::to_string(townhall_nature.return_balance_etherium()));
-                            balance_pandorium_text_n.setString(std::to_string(townhall_nature.return_balance_pandorium()));
-                            cnt_gold = 0;
-                            cnt_etherium = 0;
-                            cnt_pandorium = 0;
-
-                        }
-                        else
-                        {
-                            cnt_r++;
-                            turn_t.setString("Robot's turn");
-                            if (map[19].status == 'd') cnt_gold++;
-                            if (map[257].status == 'd') cnt_gold++;
-                            townhall_robot.update_gold(cnt_gold);
-                            if (map[84].status == 'd') cnt_etherium++;
-                            if (map[220].status == 'd') cnt_etherium++;
-                            townhall_robot.update_etherium(cnt_etherium);
-                            if (map[148].status == 'd') cnt_pandorium++;
-                            townhall_robot.update_pandorium(cnt_pandorium);
-                            balance_gold_text_r.setString(std::to_string(townhall_robot.return_balance_gold()));
-                            balance_etherium_text_r.setString(std::to_string(townhall_robot.return_balance_etherium()));
-                            balance_pandorium_text_r.setString(std::to_string(townhall_robot.return_balance_pandorium()));
-                            cnt_gold = 0;
-                            cnt_etherium = 0;
-                            cnt_pandorium = 0;
-
-
-                        }
-                        if (cnt_n == 2 && capturing_n && entities[selectedEntityIndex].return_tier() == 0)
-                        {
-                            if (map[entities[selectedEntityIndex].return_i()].status == 'g' || map[entities[selectedEntityIndex].return_i()].status == 'r')
-                                map[entities[selectedEntityIndex].return_i()].status = 'n';
-                            else if (map[entities[selectedEntityIndex].return_i()].status == 'e' || map[entities[selectedEntityIndex].return_i()].status == 'a' || map[entities[selectedEntityIndex].return_i()].status == 'p' || map[entities[selectedEntityIndex].return_i()].status == 'd')
-                                map[entities[selectedEntityIndex].return_i()].status = 'l';
-                            capturing_n = false;
-                            // l - life для природи захоплених шахт
-                        }
-                        if (cnt_r == 2 && capturing_r && entities[selectedEntityIndex].return_tier() == 0)
-                        {
-                            if (map[entities[selectedEntityIndex].return_i()].status == 'g' || map[entities[selectedEntityIndex].return_i()].status == 'n')
-                                map[entities[selectedEntityIndex].return_i()].status = 'r';
-                            else if (map[entities[selectedEntityIndex].return_i()].status == 'e' || map[entities[selectedEntityIndex].return_i()].status == 'a' || map[entities[selectedEntityIndex].return_i()].status == 'p' || map[entities[selectedEntityIndex].return_i()].status == 'l')
-                                map[entities[selectedEntityIndex].return_i()].status = 'd';
-                            capturing_r = false;
-                            //d - death для роботів захоплених шахт
-                        }
-                        for (int i = 0; i < entities.size(); i++)
-                        {
-                            entities[i].turns_set_to();
-                            entities[i].attack(entities, i);
-                            if (entities[i].return_hp() <= 0)
-                            {
-                                if (entities[i].return_tier() == 0)
-                                {
-                                    entities[i].return_drawing().setPosition(2000, 1000);
-
-                                }
-                                else if(entities[i].return_tier() == 1)
-                                {
-                                    if (entities[i].return_team() == 'n')
-                                    {
-                                        entities[i].return_drawing().setPosition(1520, 170);
-                                    }
-                                    else entities[i].return_drawing().setPosition(1720, 170);
-                                    entities[i].set_hp(150);
-                                }
-                                else if (entities[i].return_tier() == 2)
-                                {
-                                    if (entities[i].return_team() == 'n')
-                                    {
-                                        entities[i].return_drawing().setPosition(1520, 240);
-                                    }
-                                    else entities[i].return_drawing().setPosition(1720, 240);
-                                    entities[i].set_hp(120);
-                                }
-                                else if (entities[i].return_tier() == 3)
-                                {
-                                    if (entities[i].return_team() == 'n')
-                                    {
-                                        entities[i].return_drawing().setPosition(1520, 310);
-                                    }
-                                    else entities[i].return_drawing().setPosition(1720, 310);
-                                    entities[i].set_hp(180);
-                                }
-                                else if (entities[i].return_tier() == 4)
-                                {
-                                    if (entities[i].return_team() == 'n')
-                                    {
-                                        entities[i].return_drawing().setPosition(1520, 380);
-                                    }
-                                    else entities[i].return_drawing().setPosition(1720, 380);
-                                    entities[i].set_hp(300);
-                                }
-                                else
-                                {
-                                    if (entities[i].return_team() == 'n')
-                                    {
-                                        entities[i].return_drawing().setPosition(1520, 450);
-                                    }
-                                    else entities[i].return_drawing().setPosition(1720, 450);
-                                    entities[i].set_hp(450);
-                                }
-                                entities[i].change(16);
-                            }
-                        }
-
+                        cnt_n++;
+                        turn_t.setString("Nature's turn");
+                        if (map[19].status == 'l') cnt_gold++;
+                        if (map[257].status == 'l') cnt_gold++;
+                        townhall_nature.update_gold(cnt_gold);
+                        if (map[84].status == 'l') cnt_etherium++;
+                        if (map[220].status == 'l') cnt_etherium++;
+                        townhall_nature.update_etherium(cnt_etherium);
+                        if (map[148].status == 'l') cnt_pandorium++;
+                        townhall_nature.update_pandorium(cnt_pandorium);
+                        balance_gold_text_n.setString(std::to_string(townhall_nature.return_balance_gold()));
+                        balance_etherium_text_n.setString(std::to_string(townhall_nature.return_balance_etherium()));
+                        balance_pandorium_text_n.setString(std::to_string(townhall_nature.return_balance_pandorium()));
+                        cnt_gold = 0;
+                        cnt_etherium = 0;
+                        cnt_pandorium = 0;
 
                     }
+                    else
+                    {
+                        cnt_r++;
+                        turn_t.setString("Robot's turn");
+                        if (map[19].status == 'd') cnt_gold++;
+                        if (map[257].status == 'd') cnt_gold++;
+                        townhall_robot.update_gold(cnt_gold);
+                        if (map[84].status == 'd') cnt_etherium++;
+                        if (map[220].status == 'd') cnt_etherium++;
+                        townhall_robot.update_etherium(cnt_etherium);
+                        if (map[148].status == 'd') cnt_pandorium++;
+                        townhall_robot.update_pandorium(cnt_pandorium);
+                        balance_gold_text_r.setString(std::to_string(townhall_robot.return_balance_gold()));
+                        balance_etherium_text_r.setString(std::to_string(townhall_robot.return_balance_etherium()));
+                        balance_pandorium_text_r.setString(std::to_string(townhall_robot.return_balance_pandorium()));
+                        cnt_gold = 0;
+                        cnt_etherium = 0;
+                        cnt_pandorium = 0;
+                    }
+                    if (cnt_n == 2 && capturing_n && entities[selectedEntityIndex].return_tier() == 0)
+                    {
+                        if (map[entities[selectedEntityIndex].return_i()].status == 'g' || map[entities[selectedEntityIndex].return_i()].status == 'r')
+                            map[entities[selectedEntityIndex].return_i()].status = 'n';
+                        else if (map[entities[selectedEntityIndex].return_i()].status == 'e' || map[entities[selectedEntityIndex].return_i()].status == 'a' || map[entities[selectedEntityIndex].return_i()].status == 'p' || map[entities[selectedEntityIndex].return_i()].status == 'd')
+                            map[entities[selectedEntityIndex].return_i()].status = 'l';
+                        capturing_n = false;
+                        // l - life для природи захоплених шахт
+                    }
+                    if (cnt_r == 2 && capturing_r && entities[selectedEntityIndex].return_tier() == 0)
+                    {
+                        if (map[entities[selectedEntityIndex].return_i()].status == 'g' || map[entities[selectedEntityIndex].return_i()].status == 'n')
+                            map[entities[selectedEntityIndex].return_i()].status = 'r';
+                        else if (map[entities[selectedEntityIndex].return_i()].status == 'e' || map[entities[selectedEntityIndex].return_i()].status == 'a' || map[entities[selectedEntityIndex].return_i()].status == 'p' || map[entities[selectedEntityIndex].return_i()].status == 'l')
+                            map[entities[selectedEntityIndex].return_i()].status = 'd';
+                        capturing_r = false;
+                        //d - death для роботів захоплених шахт
+                    }
+                    for (int i = 0; i < entities.size(); i++)
+                    {
+                        entities[i].turns_set_to();
+                        entities[i].attack(entities, i);
+                        if (entities[i].return_hp() <= 0)
+                        {
+                            if (entities[i].return_tier() == 0)
+                            {
+                                entities[i].return_drawing().setPosition(2000, 1000);
+                            }
+                            else if (entities[i].return_tier() == 1)
+                            {
+                                if (entities[i].return_team() == 'n')
+                                {
+                                    entities[i].return_drawing().setPosition(1520, 170);
+                                }
+                                else entities[i].return_drawing().setPosition(1720, 170);
+                                entities[i].set_hp(150);
+                            }
+                            else if (entities[i].return_tier() == 2)
+                            {
+                                if (entities[i].return_team() == 'n')
+                                {
+                                    entities[i].return_drawing().setPosition(1520, 240);
+                                }
+                                else entities[i].return_drawing().setPosition(1720, 240);
+                                entities[i].set_hp(120);
+                            }
+                            else if (entities[i].return_tier() == 3)
+                            {
+                                if (entities[i].return_team() == 'n')
+                                {
+                                    entities[i].return_drawing().setPosition(1520, 310);
+                                }
+                                else entities[i].return_drawing().setPosition(1720, 310);
+                                entities[i].set_hp(180);
+                            }
+                            else if (entities[i].return_tier() == 4)
+                            {
+                                if (entities[i].return_team() == 'n')
+                                {
+                                    entities[i].return_drawing().setPosition(1520, 380);
+                                }
+                                else entities[i].return_drawing().setPosition(1720, 380);
+                                entities[i].set_hp(300);
+                            }
+                            else
+                            {
+                                if (entities[i].return_team() == 'n')
+                                {
+                                    entities[i].return_drawing().setPosition(1520, 450);
+                                }
+                                else entities[i].return_drawing().setPosition(1720, 450);
+                                entities[i].set_hp(450);
+                            }
+                            entities[i].change(16);
+                        }
+                    }
+
+
                 }
 
             if (selectedEntityIndex != -1)
@@ -1555,8 +1578,7 @@ int main()
             }
         }
 
-
-
+        
 
 
         build_map(side, numberOfHexagons_horizontal, numberOfHexagons_vertical, sign, startX, startY, window);
@@ -1591,6 +1613,17 @@ int main()
         window.draw(pandorium_stone);
         window.draw(hider_turn);
         window.draw(turn_t);
+        if (map[263].status == 'n')
+        {
+            window.draw(hider);
+            window.draw(nature_win);
+        }
+        else if (map[25].status == 'r')
+        {
+            window.draw(hider);
+            window.draw(robot_win);
+        }
+
         window.display();
 
     }
